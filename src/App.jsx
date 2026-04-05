@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // ── CONSTANTS ─────────────────────────────────────────────────────────────────
 
@@ -116,7 +116,8 @@ export default function App() {
   const [delId,        setDelId       ] = useState(null);
   const [revizyonModal,setRevizyonModal] = useState(null);
   const [testMsg,      setTestMsg      ] = useState("");
-  const [toast,        setToast        ] = useState(null); // {href, label}
+  const [toast,        setToast        ] = useState(null);
+  const [selectedId,   setSelectedId   ] = useState(null); // {href, label}
 
   useEffect(() => lsSet("alb_users", users), [users]);
   useEffect(() => lsSet("alb_jobs",  jobs),  [jobs]);
@@ -370,8 +371,9 @@ export default function App() {
                   ) : visJobs.map((job,i) => (
                     <JobRow key={job.id} job={job} idx={i+1}
                       canEdit={canEdit} showAcc={showAcc} canEditAcc={canEditAcc}
+                      selected={selectedId===job.id}
+                      onRowClick={()=>canEdit && setModal(job)}
                       onUpdate={patch=>updJob(job.id,patch)}
-                      onEdit={()=>setModal(job)}
                       onDelete={()=>setDelId(job.id)}
                       onRevizyon={()=>setRevizyonModal(job)}
                     />
@@ -509,26 +511,6 @@ function Login({ users, onLogin }) {
           <img src={LOGO_URI} alt="ALBATUR" style={{height:40,objectFit:"contain",display:"block",margin:"0 auto 14px"}}/>
         </div>
 
-        {/* Hızlı Papila Girişi */}
-        <button onClick={()=>{ const papila = users.find(u=>u.username==="papila"); if(papila) onLogin(papila); }}
-          style={{
-            width:"100%", marginBottom:10, padding:"11px 0",
-            background:"rgba(245,158,11,.08)", border:"1px solid rgba(245,158,11,.2)",
-            borderRadius:8, cursor:"pointer", color:"#f59e0b",
-            fontSize:12, fontWeight:600, fontFamily:"'IBM Plex Sans',sans-serif",
-            letterSpacing:"0.06em", transition:"all .15s",
-          }}
-          onMouseEnter={e=>{ e.currentTarget.style.background="rgba(245,158,11,.14)"; e.currentTarget.style.borderColor="rgba(245,158,11,.4)"; }}
-          onMouseLeave={e=>{ e.currentTarget.style.background="rgba(245,158,11,.08)"; e.currentTarget.style.borderColor="rgba(245,158,11,.2)"; }}>
-          ⚡ Papila olarak giriş yap
-        </button>
-
-        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-          <div style={{flex:1,height:1,background:"#141414"}}/>
-          <span style={{fontSize:9,color:"#2a2a2a",letterSpacing:"0.12em"}}>VEYA</span>
-          <div style={{flex:1,height:1,background:"#141414"}}/>
-        </div>
-
         <div style={{background:"#0e0e0e",border:"1px solid #1a1a1a",borderRadius:8,padding:22}}>
           <div style={{marginBottom:13}}>
             <label className="flbl">Kullanıcı Adı</label>
@@ -577,133 +559,6 @@ function MoneyCell({ value, onChange, onChangeCommit, width=88, placeholder="0.0
       onMouseLeave={e=>e.currentTarget.style.borderColor="transparent"}>
       {value ? fmt(value) : <span style={{color:"#2a2a2a"}}>{placeholder}</span>}
     </div>
-  );
-}
-
-// ── JOB ROW ───────────────────────────────────────────────────────────────────
-
-function JobRow({ job, idx, canEdit, showAcc, canEditAcc, onUpdate, onEdit, onDelete, onRevizyon }) {
-  const ederi  = parseFloat(job.birimFiyat||0) * parseFloat(job.adedi||0);
-  const odenen = parseFloat(job.odenen||0);
-  const kalan  = ederi - odenen;
-  const odendi = odenen > 0;
-  const d      = job.durum||"beklemede";
-  const cls    = `tr-${d}`;
-
-  const statusColor = d==="onayda"?"#f59e0b": d==="tamamlandi"?"#4ade80": d==="kapandi"?"#38bdf8": d==="revizyonda"?"#c084fc":"#c0c0c0";
-  const statusLabel = d==="beklemede"?"Beklemede": d==="onayda"?"Onayda": d==="tamamlandi"?"Tamamlandı": d==="kapandi"?"Kapandı": d==="revizyonda"?"Revizyonda":"—";
-
-  return (
-    <tr className={cls}>
-      <td style={{color:"#2a2a2a",fontSize:10,fontWeight:600}}>{idx}</td>
-      <td>{job.siparisTarihi||"—"}</td>
-      <td>{job.sinifi||"—"}</td>
-      <td style={{fontWeight:500}}>{job.kodu||"—"}</td>
-      <td>{job.kategori||"—"}</td>
-      <td style={{maxWidth:200,overflow:"hidden",textOverflow:"ellipsis"}} title={job.aciklama}>{job.aciklama||"—"}</td>
-      <td>{job.siparisiVeren||"—"}</td>
-      <td>{job.onayaGidisTarihi||"—"}</td>
-      <td>{job.teslimTarihi||"—"}</td>
-      <td>
-        {canEdit ? (
-          <select className="inp" value={d}
-            style={{width:120,fontSize:11,padding:"4px 22px 4px 8px",color:statusColor,background:"#0e0e0e",border:"1px solid #1a1a1a"}}
-            onChange={e=>onUpdate({durum:e.target.value})}>
-            <option value="beklemede">Beklemede</option>
-            <option value="onayda">Onayda</option>
-            <option value="revizyonda">Revizyonda</option>
-            <option value="tamamlandi">Tamamlandı</option>
-            <option value="kapandi">Kapandı</option>
-          </select>
-        ) : (
-          <span style={{display:"flex",alignItems:"center",gap:6,fontSize:11}}>
-            <span style={{width:6,height:6,borderRadius:"50%",background:statusColor,display:"inline-block",flexShrink:0}}/>
-            {statusLabel}
-          </span>
-        )}
-      </td>
-      {canEdit && (
-        <td>
-          <div style={{display:"flex",gap:2,alignItems:"center"}}>
-            <button className="btn bG" onClick={onEdit}>Düzenle</button>
-            {/* Onayla toggle */}
-            <button
-              title={d==="tamamlandi" ? "Onay kaldır" : "Onayla"}
-              onClick={()=>onUpdate({durum: d==="tamamlandi" ? "onayda" : "tamamlandi"})}
-              style={{
-                display:"inline-flex",alignItems:"center",gap:4,
-                padding:"3px 8px",borderRadius:4,border:"none",cursor:"pointer",
-                fontSize:10,fontWeight:500,transition:"all .15s",
-                background: d==="tamamlandi" ? "rgba(74,222,128,.15)" : "rgba(255,255,255,.03)",
-                color:       d==="tamamlandi" ? "#4ade80" : "#3a3a3a",
-                outline:     d==="tamamlandi" ? "1px solid rgba(74,222,128,.3)" : "1px solid #1e1e1e",
-              }}
-              onMouseEnter={e=>{ if(d!=="tamamlandi"){ e.currentTarget.style.color="#4ade80"; e.currentTarget.style.outline="1px solid rgba(74,222,128,.25)"; }}}
-              onMouseLeave={e=>{ if(d!=="tamamlandi"){ e.currentTarget.style.color="#3a3a3a"; e.currentTarget.style.outline="1px solid #1e1e1e"; }}}
-            >
-              {d==="tamamlandi" ? "✓ Onaylı" : "○ Onayla"}
-            </button>
-            {/* Revizyon toggle */}
-            <button
-              title={d==="revizyonda" ? "Revizyonu kaldır" : "Revizyona al"}
-              onClick={()=> d==="revizyonda" ? onUpdate({durum:"onayda"}) : onRevizyon()}
-              style={{
-                display:"inline-flex",alignItems:"center",gap:4,
-                padding:"3px 8px",borderRadius:4,border:"none",cursor:"pointer",
-                fontSize:10,fontWeight:500,transition:"all .15s",
-                background: d==="revizyonda" ? "rgba(192,132,252,.15)" : "rgba(255,255,255,.03)",
-                color:       d==="revizyonda" ? "#c084fc" : "#3a3a3a",
-                outline:     d==="revizyonda" ? "1px solid rgba(192,132,252,.3)" : "1px solid #1e1e1e",
-              }}
-              onMouseEnter={e=>{ if(d!=="revizyonda"){ e.currentTarget.style.color="#c084fc"; e.currentTarget.style.outline="1px solid rgba(192,132,252,.25)"; }}}
-              onMouseLeave={e=>{ if(d!=="revizyonda"){ e.currentTarget.style.color="#3a3a3a"; e.currentTarget.style.outline="1px solid #1e1e1e"; }}}
-            >
-              {d==="revizyonda" ? "↩ Revizyonda" : "↩ Revizyon"}
-            </button>
-            <button className="btn bR" onClick={onDelete}>Sil</button>
-          </div>
-        </td>
-      )}
-      {showAcc && <>
-        <td className="acc-sep">
-          {canEditAcc
-            ? <MoneyCell value={job.birimFiyat} onChange={v=>onUpdate({birimFiyat:v})} width={88}/>
-            : <span style={{color:"#888"}}>{job.birimFiyat ? fmt(job.birimFiyat) : "—"}</span>}
-        </td>
-        <td>
-          {canEditAcc
-            ? <input className="inp" type="number" style={{width:54}} value={job.adedi||""} placeholder="0" onChange={e=>onUpdate({adedi:e.target.value})}/>
-            : <span style={{color:"#888"}}>{job.adedi||"—"}</span>}
-        </td>
-        <td style={{color:odendi?"#444":"inherit"}}>
-          {ederi>0?fmt(ederi):"—"}
-        </td>
-        <td>
-          {canEditAcc
-            ? <MoneyCell value={job.odenen}
-                onChange={v=>{
-                  const patch = {odenen: v};
-                  const tutar = parseFloat(v||0);
-                  if (ederi > 0 && tutar >= ederi) patch.durum = "kapandi";
-                  else if (job.durum === "kapandi") patch.durum = "tamamlandi";
-                  onUpdate(patch);
-                }}
-                width={88}/>
-            : <span style={{color:"#888"}}>{job.odenen ? fmt(job.odenen) : "—"}</span>}
-        </td>
-        <td style={{color:ederi===0?"inherit":kalan<=0?"#4ade80":"#f87171"}}>
-          {ederi>0?fmt(kalan):"—"}
-        </td>
-        <td>
-          {canEditAcc
-            ? <input className="inp" type="date" style={{width:118}} value={job.odemeTarihi||""} onChange={e=>onUpdate({odemeTarihi:e.target.value})}/>
-            : <span style={{color:"#888"}}>{job.odemeTarihi||"—"}</span>}
-        </td>
-        <td style={{textAlign:"center"}}>
-          <input type="checkbox" checked={odendi} readOnly style={{width:14,height:14,accentColor:"#4ade80",cursor:"default"}}/>
-        </td>
-      </>}
-    </tr>
   );
 }
 
@@ -789,6 +644,79 @@ function DropList({ value, options, onChange, placeholder="Seçin...", specialOp
         </div>
       )}
     </div>
+  );
+}
+
+// ── JOB ROW ───────────────────────────────────────────────────────────────────
+
+function JobRow({ job, idx, canEdit, showAcc, canEditAcc, selected, onRowClick, onUpdate, onDelete, onRevizyon }) {
+  const ederi  = parseFloat(job.birimFiyat||0) * parseFloat(job.adedi||0);
+  const odenen = parseFloat(job.odenen||0);
+  const kalan  = ederi - odenen;
+  const odendi = odenen > 0;
+  const d      = job.durum||"beklemede";
+  const cls    = `tr-${d}`;
+  const statusColor = d==="onayda"?"#f59e0b":d==="tamamlandi"?"#4ade80":d==="kapandi"?"#38bdf8":d==="revizyonda"?"#c084fc":"#c0c0c0";
+  const statusLabel = d==="beklemede"?"Beklemede":d==="onayda"?"Onayda":d==="tamamlandi"?"Tamamlandı":d==="kapandi"?"Kapandı":d==="revizyonda"?"Revizyonda":"—";
+
+  return (
+    <tr className={cls}
+      onClick={onRowClick}
+      style={{cursor:canEdit?"pointer":"default",background:selected?"rgba(245,158,11,.06)":"transparent",outline:selected?"1px solid rgba(245,158,11,.2)":"none",transition:"background .15s"}}>
+      <td style={{color:"#2a2a2a",fontSize:10,fontWeight:600}}>{idx}</td>
+      <td>{job.siparisTarihi||"—"}</td>
+      <td>{job.sinifi||"—"}</td>
+      <td style={{fontWeight:500}}>{job.kodu||"—"}</td>
+      <td>{job.kategori||"—"}</td>
+      <td style={{maxWidth:200,overflow:"hidden",textOverflow:"ellipsis"}} title={job.aciklama}>{job.aciklama||"—"}</td>
+      <td>{job.siparisiVeren||"—"}</td>
+      <td>{job.onayaGidisTarihi||"—"}</td>
+      <td>{job.teslimTarihi||"—"}</td>
+      <td>
+        <span style={{display:"flex",alignItems:"center",gap:6,fontSize:11}}>
+          <span style={{width:6,height:6,borderRadius:"50%",background:statusColor,display:"inline-block",flexShrink:0}}/>
+          {statusLabel}
+        </span>
+      </td>
+      {canEdit && (
+        <td onClick={e=>e.stopPropagation()}>
+          <div style={{display:"flex",gap:2,alignItems:"center"}}>
+            <button title={d==="tamamlandi"?"Onay kaldır":"Onayla"}
+              onClick={e=>{e.stopPropagation();onUpdate({durum:d==="tamamlandi"?"onayda":"tamamlandi"});}}
+              style={{display:"inline-flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:4,border:"none",cursor:"pointer",fontSize:10,fontWeight:500,transition:"all .15s",background:d==="tamamlandi"?"rgba(74,222,128,.15)":"rgba(255,255,255,.03)",color:d==="tamamlandi"?"#4ade80":"#3a3a3a",outline:d==="tamamlandi"?"1px solid rgba(74,222,128,.3)":"1px solid #1e1e1e"}}
+              onMouseEnter={e=>{if(d!=="tamamlandi"){e.currentTarget.style.color="#4ade80";e.currentTarget.style.outline="1px solid rgba(74,222,128,.25)";}}}
+              onMouseLeave={e=>{if(d!=="tamamlandi"){e.currentTarget.style.color="#3a3a3a";e.currentTarget.style.outline="1px solid #1e1e1e";}}}
+            >{d==="tamamlandi"?"✓ Onaylı":"○ Onayla"}</button>
+            <button title={d==="revizyonda"?"Revizyonu kaldır":"Revizyona al"}
+              onClick={e=>{e.stopPropagation();d==="revizyonda"?onUpdate({durum:"onayda"}):onRevizyon();}}
+              style={{display:"inline-flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:4,border:"none",cursor:"pointer",fontSize:10,fontWeight:500,transition:"all .15s",background:d==="revizyonda"?"rgba(192,132,252,.15)":"rgba(255,255,255,.03)",color:d==="revizyonda"?"#c084fc":"#3a3a3a",outline:d==="revizyonda"?"1px solid rgba(192,132,252,.3)":"1px solid #1e1e1e"}}
+              onMouseEnter={e=>{if(d!=="revizyonda"){e.currentTarget.style.color="#c084fc";e.currentTarget.style.outline="1px solid rgba(192,132,252,.25)";}}}
+              onMouseLeave={e=>{if(d!=="revizyonda"){e.currentTarget.style.color="#3a3a3a";e.currentTarget.style.outline="1px solid #1e1e1e";}}}
+            >{d==="revizyonda"?"↩ Revizyonda":"↩ Revizyon"}</button>
+            <button className="btn bR" style={{fontSize:10}} onClick={e=>{e.stopPropagation();onDelete();}}>Sil</button>
+          </div>
+        </td>
+      )}
+      {showAcc && <>
+        <td className="acc-sep">
+          {canEditAcc?<MoneyCell value={job.birimFiyat} onChange={v=>onUpdate({birimFiyat:v})} width={88}/>:<span style={{color:"#888"}}>{job.birimFiyat?fmt(job.birimFiyat):"—"}</span>}
+        </td>
+        <td>
+          {canEditAcc?<input className="inp" type="number" style={{width:54}} value={job.adedi||""} placeholder="0" onChange={e=>onUpdate({adedi:e.target.value})}/>:<span style={{color:"#888"}}>{job.adedi||"—"}</span>}
+        </td>
+        <td style={{color:odendi?"#444":"inherit"}}>{ederi>0?fmt(ederi):"—"}</td>
+        <td>
+          {canEditAcc?<MoneyCell value={job.odenen} onChange={v=>{const patch={odenen:v};const t=parseFloat(v||0);if(ederi>0&&t>=ederi)patch.durum="kapandi";else if(job.durum==="kapandi")patch.durum="tamamlandi";onUpdate(patch);}} width={88}/>:<span style={{color:"#888"}}>{job.odenen?fmt(job.odenen):"—"}</span>}
+        </td>
+        <td style={{color:ederi===0?"inherit":kalan<=0?"#4ade80":"#f87171"}}>{ederi>0?fmt(kalan):"—"}</td>
+        <td>
+          {canEditAcc?<input className="inp" type="date" style={{width:118}} value={job.odemeTarihi||""} onChange={e=>onUpdate({odemeTarihi:e.target.value})}/>:<span style={{color:"#888"}}>{job.odemeTarihi||"—"}</span>}
+        </td>
+        <td style={{textAlign:"center"}}>
+          <input type="checkbox" checked={odendi} readOnly style={{width:14,height:14,accentColor:"#4ade80",cursor:"default"}}/>
+        </td>
+      </>}
+    </tr>
   );
 }
 
