@@ -2,7 +2,7 @@
 import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
 
 // EmailJS'i başlatın (kendi bilgilerinizle değiştirin)
-emailjs.init("YOUR_PUBLIC_KEY");
+emailjs.init("n2DX9XnaFB9Z5IMew");
 
 export async function sendEmailNotification(taskData, actionType) {
   try {
@@ -19,8 +19,8 @@ export async function sendEmailNotification(taskData, actionType) {
     };
 
     const response = await emailjs.send(
-      "YOUR_SERVICE_ID",    // EmailJS'den alacağınız Service ID
-      "YOUR_TEMPLATE_ID",   // EmailJS'den alacağınız Template ID
+      "service_0yx53dz",    // EmailJS'den alacağınız Service ID
+      "template_dt69pq6",   // EmailJS'den alacağınız Template ID
       templateParams
     );
     
