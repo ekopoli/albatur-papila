@@ -43,7 +43,6 @@ export default function JobRow({ job, idx, canEdit, showAcc, canEditAcc, onRowCl
         </span>
       </td>
 
-      {/* 👇 SADECE DURUM KAPANDİ DEĞİLSE VE DÜZENLEME YETKİSİ VARSA BUTONLARI GÖSTER */}
       {canEdit && durum !== 'kapandi' ? (
         <td onClick={e => e.stopPropagation()}>
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
