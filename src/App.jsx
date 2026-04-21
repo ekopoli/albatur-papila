@@ -398,18 +398,18 @@ export default function App() {
 ) : (
   filtered.map((job, i) => (
     <JobRow
-      key={job.id}
-      job={job}
-      idx={i + 1}
-      canEdit={canEdit && job.durum !== 'kapandi'}   // 👈 tek satırda koşul
-      showAcc={false}
-      canEditAcc={false}
-      onRowClick={() => canEdit && setEditJob(job)}
-      onUpdate={(changes) => handleUpdate(job.id, changes)}
-      onDelete={() => setDeleteConfirm(job.id)}
-      onRevizyon={() => setRevizyonJob(job)}
-      onOncelik={() => setOncelikJob(job)}
-    />
+  key={job.id}
+  job={job}
+  idx={i + 1}
+  canEdit={canEdit && job.durum !== 'kapandi'}   // 👈 SADECE BURADAN KONTROL EDİYORUZ
+  showAcc={false}
+  canEditAcc={false}
+  onRowClick={() => canEdit && setEditJob(job)}
+  onUpdate={(changes) => handleUpdate(job.id, changes)}
+  onDelete={() => setDeleteConfirm(job.id)}
+  onRevizyon={() => setRevizyonJob(job)}
+  onOncelik={() => setOncelikJob(job)}
+/>
   ))
 )}
                 </tbody>
