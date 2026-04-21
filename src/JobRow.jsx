@@ -42,34 +42,39 @@ export default function JobRow({ job, idx, canEdit, showAcc, canEditAcc, onRowCl
           {label}
         </span>
       </td>
-      {/* Butonların bulunduğu hücre: sadece canEdit true ve durum 'kapandi' değilse render et */}
-      {canEdit && durum !== 'kapandi' ? (
+
+      {/* ----- BUTONLARIN BULUNDUĞU SÜTUN ----- */}
+      {canEdit && (
         <td onClick={e => e.stopPropagation()}>
-          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            <button
-              onClick={e => { e.stopPropagation(); onUpdate({ durum: durum === 'tamamlandi' ? 'onayda' : 'tamamlandi' }) }}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
-                background: durum === 'tamamlandi' ? 'rgba(74,222,128,.2)' : 'rgba(74,222,128,.08)',
-                color: '#4ade80',
-                outline: durum === 'tamamlandi' ? '1px solid rgba(74,222,128,.5)' : '1px solid rgba(74,222,128,.2)' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(74,222,128,.25)'; e.currentTarget.style.outline = '1px solid rgba(74,222,128,.6)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = durum === 'tamamlandi' ? 'rgba(74,222,128,.2)' : 'rgba(74,222,128,.08)'; e.currentTarget.style.outline = durum === 'tamamlandi' ? '1px solid rgba(74,222,128,.5)' : '1px solid rgba(74,222,128,.2)' }}>
-              {durum === 'tamamlandi' ? '✓ Onaylı' : '✓ Onayla'}
-            </button>
-            <button
-              onClick={e => { e.stopPropagation(); durum === 'revizyonda' ? onUpdate({ durum: 'onayda' }) : onRevizyon() }}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
-                background: durum === 'revizyonda' ? 'rgba(192,132,252,.2)' : 'rgba(192,132,252,.08)',
-                color: '#c084fc',
-                outline: durum === 'revizyonda' ? '1px solid rgba(192,132,252,.5)' : '1px solid rgba(192,132,252,.2)' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(192,132,252,.25)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.6)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = durum === 'revizyonda' ? 'rgba(192,132,252,.2)' : 'rgba(192,132,252,.08)'; e.currentTarget.style.outline = durum === 'revizyonda' ? '1px solid rgba(192,132,252,.5)' : '1px solid rgba(192,132,252,.2)' }}>
-              {durum === 'revizyonda' ? '↩ Revizyonda' : '↩ Revizyon'}
-            </button>
-            <button className="btn bR" style={{ fontSize: 10 }} onClick={e => { e.stopPropagation(); onDelete() }}>Sil</button>
-          </div>
+          {durum !== 'kapandi' && (
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              <button
+                onClick={e => { e.stopPropagation(); onUpdate({ durum: durum === 'tamamlandi' ? 'onayda' : 'tamamlandi' }) }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: durum === 'tamamlandi' ? 'rgba(74,222,128,.2)' : 'rgba(74,222,128,.08)',
+                  color: '#4ade80',
+                  outline: durum === 'tamamlandi' ? '1px solid rgba(74,222,128,.5)' : '1px solid rgba(74,222,128,.2)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(74,222,128,.25)'; e.currentTarget.style.outline = '1px solid rgba(74,222,128,.6)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = durum === 'tamamlandi' ? 'rgba(74,222,128,.2)' : 'rgba(74,222,128,.08)'; e.currentTarget.style.outline = durum === 'tamamlandi' ? '1px solid rgba(74,222,128,.5)' : '1px solid rgba(74,222,128,.2)' }}>
+                {durum === 'tamamlandi' ? '✓ Onaylı' : '✓ Onayla'}
+              </button>
+              <button
+                onClick={e => { e.stopPropagation(); durum === 'revizyonda' ? onUpdate({ durum: 'onayda' }) : onRevizyon() }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: durum === 'revizyonda' ? 'rgba(192,132,252,.2)' : 'rgba(192,132,252,.08)',
+                  color: '#c084fc',
+                  outline: durum === 'revizyonda' ? '1px solid rgba(192,132,252,.5)' : '1px solid rgba(192,132,252,.2)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(192,132,252,.25)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.6)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = durum === 'revizyonda' ? 'rgba(192,132,252,.2)' : 'rgba(192,132,252,.08)'; e.currentTarget.style.outline = durum === 'revizyonda' ? '1px solid rgba(192,132,252,.5)' : '1px solid rgba(192,132,252,.2)' }}>
+                {durum === 'revizyonda' ? '↩ Revizyonda' : '↩ Revizyon'}
+              </button>
+              <button className="btn bR" style={{ fontSize: 10 }} onClick={e => { e.stopPropagation(); onDelete() }}>Sil</button>
+            </div>
+          )}
         </td>
-      ) : (canEdit ? <td></td> : null)}
+      )}
+
+      {/* ----- MUHASEBE SÜTUNLARI (isteğe bağlı) ----- */}
       {showAcc && <>
         <td className="acc-sep">
           {canEditAcc
