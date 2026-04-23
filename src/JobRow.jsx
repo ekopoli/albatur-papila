@@ -25,15 +25,15 @@ export default function JobRow({ job, idx, canEdit, showAcc, canEditAcc, onRowCl
             </button>
           : idx}
       </td>
-      <td>{job.siparisTarihi || '—'}</td>
+      <td>{fmtTarih(job.siparisTarihi)}</td>
       <td style={{ fontWeight: 500 }}>
         {job.kodu || '—'}
       </td>
       <td>{job.kategori || '—'}</td>
       <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }} title={job.aciklama}>{job.aciklama || '—'}</td>
       <td>{job.siparisiVeren || '—'}</td>
-      <td>{job.onayaGidisTarihi || '—'}</td>
-      <td>{job.teslimTarihi || '—'}</td>
+      <td>{fmtTarih(job.onayaGidisTarihi)}</td>
+      <td>{fmtTarih(job.teslimTarihi)}</td>
       <td>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: renk, display: 'inline-block', flexShrink: 0 }} />
@@ -106,7 +106,7 @@ export default function JobRow({ job, idx, canEdit, showAcc, canEditAcc, onRowCl
                 key={`dt-${job.id}-${job.odemeTarihi}`}
                 defaultValue={job.odemeTarihi || ''}
                 onChange={e => onUpdate({ odemeTarihi: e.target.value })} />
-            : <span style={{ color: 'var(--text4)' }}>{job.odemeTarihi || '—'}</span>}
+            : <span style={{ color: 'var(--text4)' }}>{fmtTarih(job.odemeTarihi)}</span>}
         </td>
         <td style={{ textAlign: 'center' }}>
           <input type="checkbox" checked={odenmis} readOnly style={{ width: 14, height: 14, accentColor: '#4ade80', cursor: 'default' }} />
