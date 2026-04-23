@@ -2,6 +2,13 @@ import React from 'react'
 import { DURUM_RENK, DURUM_LABEL, fmt } from './constants.js'
 import { InlineNumber } from './components.jsx'
 
+const fmtTarih = (t) => {
+  if (!t) return '—'
+  const [y, m, d] = t.split('-')
+  if (!y || !m || !d) return t
+  return `${d}-${m}-${y}`
+}
+
 export default function JobRow({ job, idx, canEdit, showAcc, canEditAcc, onRowClick, onUpdate, onDelete, onRevizyon, onOncelik }) {
   const durum = job.durum || 'beklemede'
   const renk = DURUM_RENK[durum] || '#c0c0c0'
