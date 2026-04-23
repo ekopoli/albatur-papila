@@ -1,0 +1,36 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repoyu İndir
+        uses: actions/checkout@v4
+
+      - name: Node.js Kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Bağımlılıkları Yükle
+        run: npm ci
+
+      - name: Build Al
+        run: npm run build
+
+      - name: GitHub Pages'e Deploy Et
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
