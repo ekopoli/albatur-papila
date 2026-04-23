@@ -23,7 +23,7 @@ jobs:
           cache: 'npm'
 
       - name: Bağımlılıkları Yükle
-        run: npm ci
+        run: npm install
 
       - name: Build Al
         run: npm run build
