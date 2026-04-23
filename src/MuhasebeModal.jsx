@@ -39,7 +39,7 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
     fontFamily: "'IBM Plex Sans',sans-serif", fontWeight: 600, fontSize: 9,
     letterSpacing: '.13em', textTransform: 'uppercase', padding: '10px 12px',
     textAlign: right ? 'right' : 'left', borderBottom: '1px solid var(--border)',
-    position: 'sticky', top: 0, background: var(--bg4), whiteSpace: 'nowrap', zIndex: 10
+    position: 'sticky', top: 0, background: 'var(--bg4)', whiteSpace: 'nowrap', zIndex: 10
   })
 
   const toggleOdeme = async (job) => {
@@ -57,7 +57,7 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
 
   return (
     <div className="overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: var(--bg4), border: '1px solid var(--border4)', borderRadius: 8, width: '96vw', maxWidth: 1000, height: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+      <div style={{ background: 'var(--bg4)', border: '1px solid var(--border4)', borderRadius: 8, width: '96vw', maxWidth: 1000, height: '90vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Başlık */}
@@ -65,7 +65,7 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
           <div style={{ fontSize: 14, fontWeight: 600, color: '#d97706', fontFamily: "'IBM Plex Sans',sans-serif" }}>₺ Muhasebe</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {/* Sekmeler */}
-            <div style={{ display: 'flex', background: var(--bg5), border: '1px solid var(--border2)', borderRadius: 6, padding: 3, gap: 2 }}>
+            <div style={{ display: 'flex', background: 'var(--bg5)', border: '1px solid var(--border2)', borderRadius: 6, padding: 3, gap: 2 }}>
               <button onClick={() => setSekme('bekleyen')}
                 style={{ padding: '5px 16px', borderRadius: 4, border: 'none', cursor: 'pointer', fontSize: 10, fontWeight: sekme === 'bekleyen' ? 600 : 400, fontFamily: "'IBM Plex Sans',sans-serif", background: sekme === 'bekleyen' ? var(--border4) : 'transparent', color: sekme === 'bekleyen' ? '#f87171' : var(--text4), transition: 'all .15s' }}>
                 Ödeme Bekleyen
@@ -86,21 +86,21 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
           <table style={{ borderCollapse: 'collapse', width: '100%' }}>
             <thead>
               <tr>
-                <th style={{ ...th(false), color: var(--text3) }}>Sınıf-Kod</th>
-                <th style={{ ...th(false), color: var(--text3) }}>Kategori</th>
-                <th style={{ ...th(false), color: var(--text3) }}>S. Veren</th>
+                <th style={{ ...th(false), color: 'var(--text3)' }}>Sınıf-Kod</th>
+                <th style={{ ...th(false), color: 'var(--text3)' }}>Kategori</th>
+                <th style={{ ...th(false), color: 'var(--text3)' }}>S. Veren</th>
                 <th style={{ ...th(true), color: '#d97706' }}>Birim Fiyat</th>
                 <th style={{ ...th(true), color: '#d97706' }}>Adet</th>
                 <th style={{ ...th(true), color: '#d97706' }}>Ederi</th>
                 <th style={{ ...th(true), color: '#d97706' }}>Ödenen</th>
                 <th style={{ ...th(true), color: '#d97706' }}>Kalan</th>
-                <th style={{ ...th(false), color: var(--text3) }}>Ödeme Tarihi</th>
+                <th style={{ ...th(false), color: 'var(--text3)' }}>Ödeme Tarihi</th>
                 <th style={{ ...th(true), color: '#4ade80', width: 60 }}>Ödendi</th>
               </tr>
             </thead>
             <tbody>
               {liste.length === 0
-                ? <tr><td colSpan={10} style={{ textAlign: 'center', padding: 48, color: var(--text5), fontSize: 11 }}>
+                ? <tr><td colSpan={10} style={{ textAlign: 'center', padding: 48, color: 'var(--text5)', fontSize: 11 }}>
                     {sekme === 'bekleyen' ? '— Ödeme bekleyen iş yok —' : '— Henüz ödenmiş iş yok —'}
                   </td></tr>
                 : liste.map(job => {
@@ -127,7 +127,7 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
                               placeholder="0" onBlur={e => updateJob(job.id, { adedi: e.target.value })} />
                           : <span style={{ fontSize: 12 }}>{job.adedi || '—'}</span>}
                       </td>
-                      <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6), textAlign: 'right', fontSize: 12, color: var(--text) }}>{ederi > 0 ? fmt(ederi) : '—'}</td>
+                      <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6), textAlign: 'right', fontSize: 12, color: 'var(--text)' }}>{ederi > 0 ? fmt(ederi) : '—'}</td>
                       <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6), textAlign: 'right' }}>
                         {canEditAcc
                           ? <InlineNumber value={job.odenen} onChange={v => {
@@ -149,7 +149,7 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
                           ? <input className="inp" type="date" style={{ width: 118 }}
                               key={`dt-${job.id}-${job.odemeTarihi}`} defaultValue={job.odemeTarihi || ''}
                               onChange={e => updateJob(job.id, { odemeTarihi: e.target.value })} />
-                          : <span style={{ fontSize: 12, color: var(--text3) }}>{job.odemeTarihi || '—'}</span>}
+                          : <span style={{ fontSize: 12, color: 'var(--text3)' }}>{job.odemeTarihi || '—'}</span>}
                       </td>
                       <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6), textAlign: 'center' }}>
                         <input type="checkbox" checked={tamOdendi}
@@ -165,22 +165,22 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
         </div>
 
         {/* Sabit toplam */}
-        <div style={{ flexShrink: 0, borderTop: '2px solid var(--border4)', background: var(--bg2), padding: '14px 22px' }}>
-          <div style={{ fontSize: 8, color: var(--text4), letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans',sans-serif", marginBottom: 12 }}>
+        <div style={{ flexShrink: 0, borderTop: '2px solid var(--border4)', background: 'var(--bg2)', padding: '14px 22px' }}>
+          <div style={{ fontSize: 8, color: 'var(--text4)', letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans',sans-serif", marginBottom: 12 }}>
             {sekme === 'bekleyen' ? 'Ödeme Bekleyenler Toplamı' : 'Ödemesi Yapılanlar Toplamı'}
           </div>
           <div style={{ display: 'flex', gap: 32, alignItems: 'flex-end' }}>
             {[
-              { l: 'Toplam Ederi', v: t.ederi, c: var(--text2) },
+              { l: 'Toplam Ederi', v: t.ederi, c: 'var(--text2)' },
               { l: 'Toplam Ödenen', v: t.odenen, c: '#4ade80' },
               { l: 'Kalan', v: t.kalan, c: t.kalan > 0 ? '#f87171' : '#4ade80' }
             ].map(({ l, v, c }, i) => (
               <React.Fragment key={l}>
-                {i > 0 && <div style={{ width: 1, height: 44, background: var(--border4), alignSelf: 'center' }} />}
+                {i > 0 && <div style={{ width: 1, height: 44, background: 'var(--border4)', alignSelf: 'center' }} />}
                 <div>
-                  <div style={{ fontSize: 9, color: var(--text4), letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans',sans-serif", marginBottom: 4 }}>{l}</div>
+                  <div style={{ fontSize: 9, color: 'var(--text4)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans',sans-serif", marginBottom: 4 }}>{l}</div>
                   <div style={{ fontSize: 22, fontWeight: 600, color: c, fontFamily: "'IBM Plex Mono',monospace", letterSpacing: '-0.02em' }}>{fmt(v)}</div>
-                  <div style={{ fontSize: 9, color: var(--text5), marginTop: 2 }}>₺</div>
+                  <div style={{ fontSize: 9, color: 'var(--text5)', marginTop: 2 }}>₺</div>
                 </div>
               </React.Fragment>
             ))}
