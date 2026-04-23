@@ -39,7 +39,7 @@ export function RevizyonModal({ job, onConfirm, onClose }) {
         <div className="mhd">
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#c084fc', fontFamily: "'IBM Plex Sans',sans-serif" }}>↩ Revizyona Al</div>
-            <div style={{ fontSize: 10, color: var(--text4), marginTop: 3 }}>{job.kodu || '—'} · {job.kategori || '—'}</div>
+            <div style={{ fontSize: 10, color: 'var(--text4)', marginTop: 3 }}>{job.kodu || '—'} · {job.kategori || '—'}</div>
           </div>
           <button className="btn bG" style={{ fontSize: 16, padding: '3px 10px' }} onClick={onClose}>✕</button>
         </div>
@@ -49,7 +49,7 @@ export function RevizyonModal({ job, onConfirm, onClose }) {
 
           {/* Referans */}
           <div style={{ paddingTop: 12, borderTop: '1px solid var(--border)', marginBottom: 14 }}>
-            <div style={{ fontSize: 8, color: var(--text4), letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 12 }}>Referans (İsteğe Bağlı)</div>
+            <div style={{ fontSize: 8, color: 'var(--text4)', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 12 }}>Referans (İsteğe Bağlı)</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13 }}>
               <div>
                 <label className="flbl">Referans Görseli</label>
@@ -63,9 +63,9 @@ export function RevizyonModal({ job, onConfirm, onClose }) {
                         setGorsel(compressed)
                       }} />
                     <label htmlFor="revRefGorsel"
-                      style={{ display: 'block', background: var(--bg6), border: '1px dashed var(--border4)', borderRadius: 4, padding: '8px 12px', cursor: 'pointer', fontSize: 11, color: var(--text4), textAlign: 'center' }}
+                      style={{ display: 'block', background: 'var(--bg6)', border: '1px dashed var(--border4)', borderRadius: 4, padding: '8px 12px', cursor: 'pointer', fontSize: 11, color: 'var(--text4)', textAlign: 'center' }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = '#c084fc'}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = var(--border4)}>
+                      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border4)'}>
                       {gorsel ? '📎 Görsel seçildi — değiştir' : '📎 Görsel seç'}
                     </label>
                   </div>
@@ -82,9 +82,9 @@ export function RevizyonModal({ job, onConfirm, onClose }) {
                       {l && (
                         <a href={l.startsWith('http') ? l : `https://${l}`}
                           target="_blank" rel="noopener noreferrer"
-                          style={{ flexShrink: 0, padding: '6px 10px', background: var(--border2), border: '1px solid var(--border4)', borderRadius: 4, color: var(--text3), fontSize: 11, textDecoration: 'none', display: 'flex', alignItems: 'center', transition: 'all .15s' }}
+                          style={{ flexShrink: 0, padding: '6px 10px', background: 'var(--border2)', border: '1px solid var(--border4)', borderRadius: 4, color: 'var(--text3)', fontSize: 11, textDecoration: 'none', display: 'flex', alignItems: 'center', transition: 'all .15s' }}
                           onMouseEnter={e => { e.currentTarget.style.borderColor = '#c084fc'; e.currentTarget.style.color = '#c084fc' }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor = var(--border4); e.currentTarget.style.color = var(--text3) }}>
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border4)'; e.currentTarget.style.color = 'var(--text3)' }}>
                           ↗
                         </a>
                       )}
@@ -95,7 +95,7 @@ export function RevizyonModal({ job, onConfirm, onClose }) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 14, borderTop: '1px solid var(--bg6) }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 14, borderTop: '1px solid 'var(--bg6)' }}>
             <button className="btn bO" onClick={onClose}>İptal</button>
             <button className="btn" style={{ background: 'rgba(192,132,252,.15)', color: '#c084fc', border: '1px solid rgba(192,132,252,.3)' }}
               onClick={() => onConfirm(not, gorsel, linkler)}>↩ Revizyona Gönder</button>
@@ -147,12 +147,12 @@ export function UsersPanel({ users, session }) {
     <div style={{ maxWidth: 820 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: var(--text), fontFamily: "'IBM Plex Sans',sans-serif", marginBottom: 3 }}>Kullanıcı Yönetimi</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', fontFamily: "'IBM Plex Sans',sans-serif", marginBottom: 3 }}>Kullanıcı Yönetimi</div>
           <div style={{ fontSize: 10, color: 'var(--faint)', fontFamily: "'IBM Plex Sans',sans-serif" }}>Kullanıcılar Firebase'de saklanır — tüm cihazlardan erişilebilir.</div>
         </div>
         <button className="btn bA" onClick={openNew}>+ Kullanıcı Ekle</button>
       </div>
-      <div style={{ background: var(--bg3), border: '1px solid var(--border)', borderRadius: 6, overflow: 'hidden' }}>
+      <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 6, overflow: 'hidden' }}>
         <table>
           <thead>
             <tr>
@@ -162,34 +162,34 @@ export function UsersPanel({ users, session }) {
           </thead>
           <tbody>
             {users.map(u => (
-              <tr key={u.id} style={{ color: var(--text2) }}>
+              <tr key={u.id} style={{ color: 'var(--text2)' }}>
                 <td style={{ fontSize: 12 }}>{u.displayName}</td>
-                <td style={{ fontSize: 11, color: var(--text4) }}>{u.username}</td>
+                <td style={{ fontSize: 11, color: 'var(--text4)' }}>{u.username}</td>
                 <td style={{ fontSize: 12 }}>
                   {isSuper
                     ? <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ color: showPw[u.id] ? var(--text3) : var(--faint), letterSpacing: showPw[u.id] ? 0 : 3 }}>
+                        <span style={{ color: showPw[u.id] ? 'var(--text3)' : 'var(--faint)', letterSpacing: showPw[u.id] ? 0 : 3 }}>
                           {showPw[u.id] ? u.password : '●'.repeat(Math.min((u.password||'').length, 8))}
                         </span>
                         <button onClick={() => setShowPw(p => ({ ...p, [u.id]: !p[u.id] }))}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '1px 4px', fontSize: 11, color: var(--text5), borderRadius: 3 }}
-                          onMouseEnter={e => e.currentTarget.style.color = var(--text3)}
-                          onMouseLeave={e => e.currentTarget.style.color = var(--text5)}>
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '1px 4px', fontSize: 11, color: 'var(--text5)', borderRadius: 3 }}
+                          onMouseEnter={e => e.currentTarget.style.color = 'var(--text3)'}
+                          onMouseLeave={e => e.currentTarget.style.color = 'var(--text5)'}>
                           {showPw[u.id] ? '○' : '◉'}
                         </button>
                       </div>
-                    : <span style={{ color: var(--faint), letterSpacing: 3 }}>{'●'.repeat(Math.min((u.password||'').length, 8))}</span>}
+                    : <span style={{ color: 'var(--faint)', letterSpacing: 3 }}>{'●'.repeat(Math.min((u.password||'').length, 8))}</span>}
                 </td>
                 <td><span className={`badge b${(u.role||'g')[0]}`}>{ROLLER[u.role] || u.role}</span></td>
                 <td>
                   {u.mustChangePassword
                     ? <span style={{ fontSize: 9, color: '#f59e0b', letterSpacing: '0.08em' }}>⚠ Şifre bekleniyor</span>
-                    : <span style={{ fontSize: 9, color: var(--text5), letterSpacing: '0.08em' }}>✓ Aktif</span>}
+                    : <span style={{ fontSize: 9, color: 'var(--text5)', letterSpacing: '0.08em' }}>✓ Aktif</span>}
                 </td>
                 <td style={{ textAlign: 'right', paddingRight: 12 }}>
                   {delConfirm === u.id
                     ? <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 10, color: var(--text4) }}>Silinsin mi?</span>
+                        <span style={{ fontSize: 10, color: 'var(--text4)' }}>Silinsin mi?</span>
                         <button className="btn" style={{ background: '#7f1d1d', color: '#fca5a5', fontSize: 10, padding: '3px 10px' }} onClick={() => del(u.id)}>Evet</button>
                         <button className="btn bO" style={{ fontSize: 10, padding: '3px 10px' }} onClick={() => setDelConfirm(null)}>Hayır</button>
                       </div>
@@ -209,8 +209,8 @@ export function UsersPanel({ users, session }) {
           <div className="mbox" style={{ maxWidth: 520 }} onClick={e => e.stopPropagation()}>
             <div className="mhd">
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: var(--text), fontFamily: "'IBM Plex Sans',sans-serif" }}>{editing === 'new' ? 'Yeni Kullanıcı' : `Düzenle — ${editing.displayName}`}</div>
-                <div style={{ fontSize: 9, color: var(--text4), marginTop: 2 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', fontFamily: "'IBM Plex Sans',sans-serif" }}>{editing === 'new' ? 'Yeni Kullanıcı' : `Düzenle — ${editing.displayName}`}</div>
+                <div style={{ fontSize: 9, color: 'var(--text4)', marginTop: 2 }}>
                   {editing === 'new' ? 'Kullanıcı ilk girişte kendi şifresini belirleyecek' : ''}
                 </div>
               </div>
@@ -230,7 +230,7 @@ export function UsersPanel({ users, session }) {
                     ? <select className="inp" value={form.role} onChange={e => setF('role', e.target.value)}>
                         {roles.map(r => <option key={r.v} value={r.v}>{r.l}</option>)}
                       </select>
-                    : <div className="inp" style={{ color: var(--text4), cursor: 'not-allowed' }}>{ROLLER[form.role] || form.role}</div>
+                    : <div className="inp" style={{ color: 'var(--text4)', cursor: 'not-allowed' }}>{ROLLER[form.role] || form.role}</div>
                   }
                 </div>
                 {isSuper && (
@@ -238,13 +238,13 @@ export function UsersPanel({ users, session }) {
                     <input type="checkbox" id="mustChange" checked={form.mustChangePassword}
                       onChange={e => setF('mustChangePassword', e.target.checked)}
                       style={{ accentColor: '#f59e0b', width: 14, height: 14 }} />
-                    <label htmlFor="mustChange" style={{ fontSize: 11, color: var(--text3), cursor: 'pointer', fontFamily: "'IBM Plex Sans',sans-serif" }}>
+                    <label htmlFor="mustChange" style={{ fontSize: 11, color: 'var(--text3)', cursor: 'pointer', fontFamily: "'IBM Plex Sans',sans-serif" }}>
                       İlk girişte şifre değiştirmeye zorla
                     </label>
                   </div>
                 )}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 14, borderTop: '1px solid var(--bg6) }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 14, borderTop: '1px solid 'var(--bg6)' }}>
                 <button className="btn bO" onClick={closeEdit}>İptal</button>
                 <button className="btn bA" onClick={save} disabled={saving} style={{ opacity: saving ? .7 : 1 }}>
                   {saving ? 'Kaydediliyor…' : editing === 'new' ? '+ Ekle' : '✓ Kaydet'}
