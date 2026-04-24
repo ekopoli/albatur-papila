@@ -86,7 +86,7 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
           <table style={{ borderCollapse: 'collapse', width: '100%' }}>
             <thead>
               <tr>
-                <th style={{ ...th(false), color: 'var(--text3)' }}>Sınıf-Kod</th>
+                <th style={{ ...th(false), color: 'var(--text3)' }}>Kod</th>
                 <th style={{ ...th(false), color: 'var(--text3)' }}>Kategori</th>
                 <th style={{ ...th(false), color: 'var(--text3)' }}>S. Veren</th>
                 <th style={{ ...th(true), color: '#d97706' }}>Birim Fiyat</th>
@@ -111,7 +111,7 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
                   return (
                     <tr key={job.id} style={{ opacity: sekme === 'odenmis' ? 0.7 : 1 }}>
                       <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6)', fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap' }}>
-                        {job.sinifi && job.kodu ? `${job.sinifi}-${job.kodu}` : job.kodu || job.sinifi || '—'}
+                        {job.kodu || job.sinifi || '—'}
                       </td>
                       <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6)', fontSize: 12, whiteSpace: 'nowrap' }}>{job.kategori || '—'}</td>
                       <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6)', fontSize: 12, whiteSpace: 'nowrap' }}>{job.siparisiVeren || '—'}</td>
