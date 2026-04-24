@@ -1658,6 +1658,7 @@ input,select,textarea,button{font-family:'IBM Plex Mono',monospace;}
 .tr-tamamlandi{color:#4ade80;opacity:.8;}
 .tr-kapandi{color:#38bdf8;opacity:.65;}
 .tr-revizyonda{color:#c084fc;opacity:.9;}
+.tr-uretimde{color:#fb923c;}
 table{border-collapse:collapse;width:100%;}
 th{font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg3);z-index:10;white-space:nowrap;}
 td{font-size:12px;padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;color:var(--text2);}
