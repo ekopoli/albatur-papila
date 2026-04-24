@@ -48,31 +48,76 @@ export default function JobRow({ job, idx, canEdit, showAcc, canEditAcc, onRowCl
         </span>
       </td>
 
-      {/* 👇 SADECE DURUM KAPANDİ DEĞİLSE VE DÜZENLEME YETKİSİ VARSA BUTONLARI GÖSTER */}
+      {/* 👇 DURUM VE YETKİYE GÖRE BUTONLAR */}
       {canEdit && durum !== 'kapandi' ? (
         <td onClick={e => e.stopPropagation()}>
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            <button
-              onClick={e => { e.stopPropagation(); onUpdate({ durum: durum === 'tamamlandi' ? 'onayda' : 'tamamlandi' }) }}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
-                background: durum === 'tamamlandi' ? 'rgba(74,222,128,.2)' : 'rgba(74,222,128,.08)',
-                color: '#4ade80',
-                outline: durum === 'tamamlandi' ? '1px solid rgba(74,222,128,.5)' : '1px solid rgba(74,222,128,.2)' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(74,222,128,.25)'; e.currentTarget.style.outline = '1px solid rgba(74,222,128,.6)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = durum === 'tamamlandi' ? 'rgba(74,222,128,.2)' : 'rgba(74,222,128,.08)'; e.currentTarget.style.outline = durum === 'tamamlandi' ? '1px solid rgba(74,222,128,.5)' : '1px solid rgba(74,222,128,.2)' }}>
-              {durum === 'tamamlandi' ? '✓ Onaylı' : '✓ Onayla'}
-            </button>
-            <button
-              onClick={e => { e.stopPropagation(); durum === 'revizyonda' ? onUpdate({ durum: 'onayda' }) : onRevizyon() }}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
-                background: durum === 'revizyonda' ? 'rgba(192,132,252,.2)' : 'rgba(192,132,252,.08)',
-                color: '#c084fc',
-                outline: durum === 'revizyonda' ? '1px solid rgba(192,132,252,.5)' : '1px solid rgba(192,132,252,.2)' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(192,132,252,.25)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.6)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = durum === 'revizyonda' ? 'rgba(192,132,252,.2)' : 'rgba(192,132,252,.08)'; e.currentTarget.style.outline = durum === 'revizyonda' ? '1px solid rgba(192,132,252,.5)' : '1px solid rgba(192,132,252,.2)' }}>
-              {durum === 'revizyonda' ? '↩ Revizyonda' : '↩ Revizyon'}
-            </button>
-            <button className="btn bR" style={{ fontSize: 10 }} onClick={e => { e.stopPropagation(); onDelete() }}>Sil</button>
+
+            {/* ÜRETİMDE: sadece "Onaya Gönder" butonu */}
+            {durum === 'uretimde' && (
+              <button
+                onClick={e => { e.stopPropagation(); onUpdate({ durum: 'onayda' }) }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: 'rgba(245,158,11,.08)', color: '#f59e0b',
+                  outline: '1px solid rgba(245,158,11,.2)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245,158,11,.2)'; e.currentTarget.style.outline = '1px solid rgba(245,158,11,.5)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(245,158,11,.08)'; e.currentTarget.style.outline = '1px solid rgba(245,158,11,.2)' }}>
+                ↑ Onaya Gönder
+              </button>
+            )}
+
+            {/* BEKLEMEDE: "Üretime Gönder" butonu */}
+            {durum === 'beklemede' && (
+              <button
+                onClick={e => { e.stopPropagation(); onUpdate({ durum: 'uretimde' }) }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: 'rgba(56,189,248,.08)', color: '#38bdf8',
+                  outline: '1px solid rgba(56,189,248,.2)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(56,189,248,.2)'; e.currentTarget.style.outline = '1px solid rgba(56,189,248,.5)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(56,189,248,.08)'; e.currentTarget.style.outline = '1px solid rgba(56,189,248,.2)' }}>
+                ▶ Üretime Gönder
+              </button>
+            )}
+
+            {/* ONAYDA: Onayla + Revizyon + Sil (değişmedi) */}
+            {durum === 'onayda' && (<>
+              <button
+                onClick={e => { e.stopPropagation(); onUpdate({ durum: 'tamamlandi' }) }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: 'rgba(74,222,128,.08)', color: '#4ade80',
+                  outline: '1px solid rgba(74,222,128,.2)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(74,222,128,.25)'; e.currentTarget.style.outline = '1px solid rgba(74,222,128,.6)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(74,222,128,.08)'; e.currentTarget.style.outline = '1px solid rgba(74,222,128,.2)' }}>
+                ✓ Onayla
+              </button>
+              <button
+                onClick={e => { e.stopPropagation(); onRevizyon() }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: 'rgba(192,132,252,.08)', color: '#c084fc',
+                  outline: '1px solid rgba(192,132,252,.2)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(192,132,252,.25)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.6)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(192,132,252,.08)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.2)' }}>
+                ↩ Revizyon
+              </button>
+              <button className="btn bR" style={{ fontSize: 10 }} onClick={e => { e.stopPropagation(); onDelete() }}>Sil</button>
+            </>)}
+
+            {/* REVİZYONDA: Revizyonda (geri al) + Sil (değişmedi) */}
+            {durum === 'revizyonda' && (<>
+              <button
+                onClick={e => { e.stopPropagation(); onUpdate({ durum: 'onayda' }) }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: 'rgba(192,132,252,.2)', color: '#c084fc',
+                  outline: '1px solid rgba(192,132,252,.5)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(192,132,252,.25)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.6)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(192,132,252,.2)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.5)' }}>
+                ↩ Revizyonda
+              </button>
+              <button className="btn bR" style={{ fontSize: 10 }} onClick={e => { e.stopPropagation(); onDelete() }}>Sil</button>
+            </>)}
+
+            {/* TAMAMLANDI: buton yok */}
+
           </div>
         </td>
       ) : (canEdit ? <td></td> : null)}
