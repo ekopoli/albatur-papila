@@ -53,8 +53,8 @@ export default function JobRow({ job, idx, canEdit, isSuperUser, showAcc, canEdi
         <td onClick={e => e.stopPropagation()}>
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
 
-            {/* ÜRETİMDE: sadece "Onaya Gönder" butonu */}
-            {durum === 'uretimde' && (
+            {/* ÜRETİMDE: sadece "Onaya Gönder" butonu — sadece Tam Yetkili */}
+            {durum === 'uretimde' && isSuperUser && (
               <button
                 onClick={e => { e.stopPropagation(); onUpdate({ durum: 'onayda' }) }}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
