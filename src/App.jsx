@@ -322,13 +322,20 @@ export default function App() {
                   {filtered.length === 0
                     ? <tr><td colSpan={10} style={{ textAlign: 'center', padding: 52, color: '#222', fontSize: 11, letterSpacing: '0.12em' }}>— Kayıt bulunamadı —</td></tr>
                     : filtered.map((job, i) => (
-                      <JobRow key={job.id} job={job} idx={i + 1}
-                        canEdit={canEdit} showAcc={false} canEditAcc={false}
-                        onRowClick={() => canEdit && setEditJob(job)}
-                        onUpdate={(changes) => handleUpdate(job.id, changes)}
-                        onDelete={() => setDeleteConfirm(job.id)}
-                        onRevizyon={() => setRevizyonJob(job)}
-                        onOncelik={() => setOncelikJob(job)} />
+                      <JobRow
+                           key={job.id}
+                           job={job}
+                           idx={i + 1}
+                           canEdit={canEdit}
+                           canEditAcc={false}
+                           showAcc={false}
+                           isSuper={session?.role === 'super'}   // ← bu satırı ekleyin
+                           onRowClick={() => canEdit && setEditJob(job)}
+                           onUpdate={(changes) => handleUpdate(job.id, changes)}
+                           onDelete={() => setDeleteConfirm(job.id)}
+                           onRevizyon={() => setRevizyonJob(job)}
+                           onOncelik={() => setOncelikJob(job)}
+                           />
                     ))
                   }
                 </tbody>
