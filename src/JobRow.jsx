@@ -1,0 +1,167 @@
+import React from 'react'
+import { DURUM_RENK, DURUM_LABEL, fmt } from './constants.js'
+import { InlineNumber } from './components.jsx'
+
+const fmtTarih = (t) => {
+  if (!t) return '—'
+  const [y, m, d] = t.split('-')
+  if (!y || !m || !d) return t
+  return `${d}-${m}-${y}`
+}
+
+export default function JobRow({ job, idx, canEdit, isSuperUser, showAcc, canEditAcc, onRowClick, onUpdate, onDelete, onRevizyon, onOncelik }) {
+  const durum = job.durum || 'beklemede'
+  const renk = DURUM_RENK[durum] || '#c0c0c0'
+  const label = DURUM_LABEL[durum] || '—'
+  const ederi = parseFloat(job.birimFiyat || 0) * parseFloat(job.adedi || 0)
+  const odenen = parseFloat(job.odenen || 0)
+  const kalan = ederi - odenen
+  const odenmis = odenen > 0
+
+  return (
+    <tr className={`tr-${durum}`} onClick={onRowClick}
+      style={{ cursor: canEdit ? 'pointer' : 'default', transition: 'background .15s' }}>
+      <td style={{ color: 'var(--text3)', fontSize: 10, fontWeight: 600, width: 36 }}>
+        {durum === 'beklemede' && canEdit
+          ? <button onClick={e => { e.stopPropagation(); onOncelik && onOncelik() }}
+              title={job.oncelik ? `Öncelik: ${job.oncelik} — değiştir` : 'Öncelik ata'}
+              style={{ background: job.oncelik ? 'rgba(245,158,11,.2)' : 'var(--bg5)', border: `1px solid ${job.oncelik ? 'rgba(245,158,11,.4)' : 'var(--border2)'}`, borderRadius: 4, color: job.oncelik ? '#f59e0b' : 'var(--text3)', cursor: 'pointer', width: 24, height: 24, fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'IBM Plex Mono',monospace", transition: 'all .15s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(245,158,11,.5)'; e.currentTarget.style.color = '#f59e0b' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = job.oncelik ? 'rgba(245,158,11,.4)' : 'var(--border2)'; e.currentTarget.style.color = job.oncelik ? '#f59e0b' : 'var(--text3)' }}>
+              {job.oncelik || '·'}
+            </button>
+          : idx}
+      </td>
+      <td>{fmtTarih(job.siparisTarihi)}</td>
+      <td style={{ fontWeight: 500 }}>
+        {job.kodu || '—'}
+      </td>
+      <td>{job.kategori || '—'}</td>
+      <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }} title={job.aciklama}>{job.aciklama || '—'}</td>
+      <td>{job.siparisiVeren || '—'}</td>
+      <td>{fmtTarih(job.onayaGidisTarihi)}</td>
+      <td>{fmtTarih(job.teslimTarihi)}</td>
+      <td>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: renk, display: 'inline-block', flexShrink: 0 }} />
+          {label}
+        </span>
+      </td>
+
+      {/* 👇 DURUM VE YETKİYE GÖRE BUTONLAR */}
+      {canEdit && durum !== 'kapandi' ? (
+        <td onClick={e => e.stopPropagation()}>
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+
+            {/* ÜRETİMDE: sadece "Onaya Gönder" butonu */}
+            {durum === 'uretimde' && (
+              <button
+                onClick={e => { e.stopPropagation(); onUpdate({ durum: 'onayda' }) }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: 'rgba(245,158,11,.08)', color: '#f59e0b',
+                  outline: '1px solid rgba(245,158,11,.2)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245,158,11,.2)'; e.currentTarget.style.outline = '1px solid rgba(245,158,11,.5)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(245,158,11,.08)'; e.currentTarget.style.outline = '1px solid rgba(245,158,11,.2)' }}>
+                ↑ Onaya Gönder
+              </button>
+            )}
+
+            {/* BEKLEMEDE: "Üretime Gönder" butonu — sadece Tam Yetkili */}
+            {durum === 'beklemede' && isSuperUser && (
+              <button
+                onClick={e => { e.stopPropagation(); onUpdate({ durum: 'uretimde' }) }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: 'rgba(56,189,248,.08)', color: '#38bdf8',
+                  outline: '1px solid rgba(56,189,248,.2)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(56,189,248,.2)'; e.currentTarget.style.outline = '1px solid rgba(56,189,248,.5)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(56,189,248,.08)'; e.currentTarget.style.outline = '1px solid rgba(56,189,248,.2)' }}>
+                ▶ Üretime Gönder
+              </button>
+            )}
+
+            {/* ONAYDA: Onayla + Revizyon */}
+            {durum === 'onayda' && (<>
+              <button
+                onClick={e => { e.stopPropagation(); onUpdate({ durum: 'tamamlandi' }) }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: 'rgba(74,222,128,.08)', color: '#4ade80',
+                  outline: '1px solid rgba(74,222,128,.2)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(74,222,128,.25)'; e.currentTarget.style.outline = '1px solid rgba(74,222,128,.6)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(74,222,128,.08)'; e.currentTarget.style.outline = '1px solid rgba(74,222,128,.2)' }}>
+                ✓ Onayla
+              </button>
+              <button
+                onClick={e => { e.stopPropagation(); onRevizyon() }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: 'rgba(192,132,252,.08)', color: '#c084fc',
+                  outline: '1px solid rgba(192,132,252,.2)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(192,132,252,.25)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.6)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(192,132,252,.08)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.2)' }}>
+                ↩ Revizyon
+              </button>
+            </>)}
+
+            {/* REVİZYONDA: Onaya geri gönder */}
+            {durum === 'revizyonda' && (<>
+              <button
+                onClick={e => { e.stopPropagation(); onUpdate({ durum: 'onayda' }) }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all .15s', border: 'none',
+                  background: 'rgba(192,132,252,.2)', color: '#c084fc',
+                  outline: '1px solid rgba(192,132,252,.5)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(192,132,252,.25)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.6)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(192,132,252,.2)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.5)' }}>
+                ↩ Revizyonda
+              </button>
+            </>)}
+
+            {/* TAMAMLANDI: buton yok */}
+
+          </div>
+        </td>
+      ) : (canEdit ? <td></td> : null)}
+
+      {showAcc && <>
+        <td className="acc-sep">
+          {canEditAcc
+            ? <InlineNumber value={job.birimFiyat} onChange={v => onUpdate({ birimFiyat: v })} />
+            : <span style={{ color: 'var(--text4)' }}>{job.birimFiyat ? fmt(job.birimFiyat) : '—'}</span>}
+        </td>
+        <td>
+          {canEditAcc
+            ? <input className="inp" type="number" style={{ width: 54 }}
+                key={`ad-${job.id}-${job.adedi}`}
+                defaultValue={job.adedi || ''}
+                placeholder="0"
+                onBlur={e => onUpdate({ adedi: e.target.value })} />
+            : <span style={{ color: 'var(--text4)' }}>{job.adedi || '—'}</span>}
+        </td>
+        <td>{ederi > 0 ? fmt(ederi) : '—'}</td>
+        <td>
+          {canEditAcc
+            ? <InlineNumber value={job.odenen} onChange={v => {
+                const upd = { odenen: v }
+                const val = parseFloat(v || 0)
+                if (ederi > 0 && val >= ederi) upd.durum = 'kapandi'
+                else if (job.durum === 'kapandi') upd.durum = 'tamamlandi'
+                onUpdate(upd)
+              }} />
+            : <span style={{ color: 'var(--text4)' }}>{job.odenen ? fmt(job.odenen) : '—'}</span>}
+        </td>
+        <td style={{ color: kalan <= 0 ? '#4ade80' : '#f87171', fontWeight: 500 }}>
+          {(ederi > 0 || odenen > 0) ? fmt(kalan) : '—'}
+        </td>
+        <td>
+          {canEditAcc
+            ? <input className="inp" type="date" style={{ width: 118 }}
+                key={`dt-${job.id}-${job.odemeTarihi}`}
+                defaultValue={job.odemeTarihi || ''}
+                onChange={e => onUpdate({ odemeTarihi: e.target.value })} />
+            : <span style={{ color: 'var(--text4)' }}>{fmtTarih(job.odemeTarihi)}</span>}
+        </td>
+        <td style={{ textAlign: 'center' }}>
+          <input type="checkbox" checked={odenmis} readOnly style={{ width: 14, height: 14, accentColor: '#4ade80', cursor: 'default' }} />
+        </td>
+      </>}
+    </tr>
+  )
+}
