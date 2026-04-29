@@ -14,7 +14,7 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
     const ederi  = parseFloat(j.birimFiyat || 0) * parseFloat(j.adedi || 0)
     const odenen = parseFloat(j.odenen || 0)
     return ederi > 0 && odenen >= ederi
-  })
+  }).sort((a, b) => (b.odemeTarihi || '').localeCompare(a.odemeTarihi || ''))
   const bekleyen  = tumTamamlananlar.filter(j => {
     const ederi  = parseFloat(j.birimFiyat || 0) * parseFloat(j.adedi || 0)
     const odenen = parseFloat(j.odenen || 0)
