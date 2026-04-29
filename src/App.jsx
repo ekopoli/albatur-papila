@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import emailjs from '@emailjs/browser'
 import { listenJobs, addJob, updateJob, deleteJob,
          listenCustomCodes, listenCustomKategoriler, listenCustomSiniflar,
          listenUsers, saveUserToDB, updateUserInDB, deleteUserFromDB, initUsersIfEmpty,
@@ -29,7 +30,6 @@ export default function App() {
   const [editJob, setEditJob] = useState(null)
   const [revizyonJob, setRevizyonJob] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
-  const [mailAlert, setMailAlert] = useState(null)
   const [showImport, setShowImport] = useState(false)
   const [oncelikJob, setOncelikJob] = useState(null)
   const [arama, setArama] = useState('')
@@ -51,12 +51,6 @@ export default function App() {
     return () => { u1(); u2(); u3(); u4(); u5() }
   }, [])
 
-  // Auto-dismiss mail alert
-  useEffect(() => {
-    if (!mailAlert) return
-    const t = setTimeout(() => setMailAlert(null), 10000)
-    return () => clearTimeout(t)
-  }, [mailAlert])
 
   const logout = () => { setSession(null); setTema('dark'); setPage('main') }
 
@@ -78,13 +72,15 @@ export default function App() {
     const subj = type === 'new'
       ? `ALBATUR-Papila — Yeni Sipariş: ${job.kodu || ''} ${job.kategori || ''}`
       : `↩ ALBATUR-Papila — Revizyon: ${job.kodu || ''} ${job.kategori || ''}`
-    const body = type === 'new'
+    const content = type === 'new'
       ? `Yeni sipariş kaydedildi.\n\nTarih: ${job.siparisTarihi || '—'}\nSınıf: ${job.sinifi || '—'}\nKod: ${job.kodu || '—'}\nKategori: ${job.kategori || '—'}\nAçıklama: ${job.aciklama || '—'}\nSiparişi Veren: ${job.siparisiVeren || '—'}\nTeslim: ${job.teslimTarihi || '—'}`
       : `Revizyon alındı.\n\nKod: ${job.kodu || '—'}\nKategori: ${job.kategori || '—'}\nSiparişi Veren: ${job.siparisiVeren || '—'}\n\nRevizyon Notu:\n${job.revizyonNotu || '(yok)'}`
-    setMailAlert({
-      href: `mailto:ipapila@gmail.com?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`,
-      label: type === 'new' ? `📋 Yeni sipariş: ${job.kodu || ''} ${job.kategori || ''}` : `↩ Revizyon: ${job.kodu || ''} ${job.kategori || ''}`
-    })
+    emailjs.send(
+      'service_slel8rg',
+      'template_bvyl1qe',
+      { name: 'ALBATUR-Papila', email: 'ipapila@gmail.com', subject: subj, content },
+      'vFzf9dPBuudScrCmO'
+    ).catch(err => console.error('Mail gönderilemedi:', err))
   }
 
   // Beklemede öncelikleri her zaman 1'den sıkıştır
@@ -387,14 +383,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Mail alert */}
-      {mailAlert && (
-        <div style={{ position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)', background: 'var(--bg5)', border: '1px solid var(--border2)', borderRadius: 8, padding: '12px 16px', zIndex: 200, display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 8px 24px rgba(0,0,0,.6)', maxWidth: 340, width: '90%' }}>
-          <span style={{ fontSize: 11, color: 'var(--text3)', flex: 1, fontFamily: "'IBM Plex Sans',sans-serif" }}>{mailAlert.label}</span>
-          <a href={mailAlert.href} onClick={() => setMailAlert(null)} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 4, background: '#f59e0b', color: '#000', fontSize: 11, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>📧 Mail Gönder</a>
-          <button onClick={() => setMailAlert(null)} style={{ background: 'none', border: 'none', color: '#333', cursor: 'pointer', fontSize: 14 }}>✕</button>
-        </div>
-      )}
     </div>
   )
 }
