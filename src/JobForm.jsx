@@ -106,7 +106,7 @@ function ListeYoneticisi({ baslik, staticItems, customItems, rawData, onSecim, o
 }
 
 // ─── Ana Form ─────────────────────────────────────────────────────────────────
-export default function JobForm({ job, session, canAcc, onSave, onClose,
+export default function JobForm({ job, session, canAcc, onSave, onClose, onDelete,
   customCodes = {}, rawCustomCodes = {}, customKategoriler = [], customSiniflar = [] }) {
 
   const [yonetici, setYonetici] = useState(null) // null | 'sinif' | 'kod' | 'kategori'
@@ -379,6 +379,12 @@ const gorselSikistir = (file) => new Promise((resolve) => {
             </>}
 
             <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 16, borderTop: '1px solid #101010' }}>
+              {job && onDelete && (
+                <button className="btn" onClick={() => { if (window.confirm('Bu kaydı silmek istediğinize emin misiniz?')) onDelete(job.id) }}
+                  style={{ marginRight: 'auto', background: 'transparent', border: '1px solid #c0392b44', color: '#f87171' }}>
+                  🗑 Sil
+                </button>
+              )}
               <button className="btn bO" onClick={onClose}>İptal</button>
               <button className="btn bA" onClick={save}>{job ? '✓ Güncelle' : '+ Ekle'}</button>
             </div>
