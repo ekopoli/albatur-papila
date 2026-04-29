@@ -131,27 +131,13 @@ export default function JobForm({ job, session, canAcc, onSave, onClose,
     if (!f.siparisTarihi) { alert('Sipariş tarihi giriniz.'); return }
     if (!job && !f.sinifi) { alert('Sınıf seçiniz.'); return }
     if (!job && !f.kodu) { alert('Kod seçiniz.'); return }
-
-    // Ödeme tamamlandıysa otomatik kapandı; ödeme eksikse kapandı → tamamlandi
-    const _ederi  = parseFloat(f.birimFiyat || 0) * parseFloat(f.adedi || 0)
-    const _odenen = parseFloat(f.odenen || 0)
-    const tamOdendi = _ederi > 0 && _odenen >= _ederi
-    let durum = f.durum
-    if (tamOdendi) {
-      durum = 'kapandi'
-    } else if (durum === 'kapandi') {
-      durum = 'tamamlandi'
-    }
-    const odemeTarihi = tamOdendi && !f.odemeTarihi
-      ? new Date().toISOString().slice(0, 10)
-      : f.odemeTarihi
-
+    const durum = f.durum
     onSave({
       ...(job ? { id: job.id } : {}),
       siparisTarihi: f.siparisTarihi, sinifi: f.sinifi, kodu: f.kodu, kategori: f.kategori,
       aciklama: f.aciklama, siparisiVeren: f.siparisiVeren,
       onayaGidisTarihi: f.onayaGidisTarihi, teslimTarihi: f.teslimTarihi, durum,
-      birimFiyat: f.birimFiyat, adedi: f.adedi, odenen: f.odenen, odemeTarihi,
+      birimFiyat: f.birimFiyat, adedi: f.adedi, odenen: f.odenen, odemeTarihi: f.odemeTarihi,
       refGorsel: f.refGorsel || '', refLink1: f.refLink1 || '', refLink2: f.refLink2 || '', refLink3: f.refLink3 || ''
     })
   }
@@ -361,18 +347,7 @@ const gorselSikistir = (file) => new Promise((resolve) => {
                 <div><Lbl c="Birim Fiyat (₺)" /><input className="inp" type="number" step=".01" value={f.birimFiyat} onChange={e => set('birimFiyat', e.target.value)} placeholder="0.00" /></div>
                 <div><Lbl c="Adedi" /><input className="inp" type="number" value={f.adedi} onChange={e => set('adedi', e.target.value)} placeholder="0" /></div>
                 <div><Lbl c="Ederi (Otomatik)" /><div className="inp" style={{ color: '#f59e0b', fontWeight: 500 }}>{fmt(ederi)}</div></div>
-                <div><Lbl c="Ödenen (₺)" /><input className="inp" type="number" step=".01" value={f.odenen} onChange={e => {
-                  const val = e.target.value
-                  const _e = parseFloat(f.birimFiyat || 0) * parseFloat(f.adedi || 0)
-                  const _o = parseFloat(val || 0)
-                  setF(p => ({
-                    ...p,
-                    odenen: val,
-                    durum: _e > 0 && _o >= _e ? 'kapandi'
-                           : p.durum === 'kapandi' ? 'tamamlandi'
-                           : p.durum
-                  }))
-                }} placeholder="0.00" /></div>
+                <div><Lbl c="Ödenen (₺)" /><input className="inp" type="number" step=".01" value={f.odenen} onChange={e => set('odenen', e.target.value)} placeholder="0.00" /></div>
                 <div><Lbl c="Kalan (Otomatik)" /><div className="inp" style={{ color: ederi > 0 && kalan <= 0 ? '#4ade80' : '#f87171', fontWeight: 500 }}>{fmt(kalan)}</div></div>
                 <div><Lbl c="Ödeme Tarihi" /><input className="inp" type="date" value={f.odemeTarihi} onChange={e => set('odemeTarihi', e.target.value)} /></div>
               </div>
