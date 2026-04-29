@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import emailjs from '@emailjs/browser'
+const emailjs = window.emailjs
 import { listenJobs, addJob, updateJob, deleteJob,
          listenCustomCodes, listenCustomKategoriler, listenCustomSiniflar,
          listenUsers, saveUserToDB, updateUserInDB, deleteUserFromDB, initUsersIfEmpty,
