@@ -360,6 +360,7 @@ export default function App() {
           customKategoriler={customKategoriler}
           customSiniflar={customSiniflar}
           onSave={handleSave}
+          onDelete={async (id) => { await handleDelete(id); setEditJob(null) }}
           onClose={() => setEditJob(null)} />
       )}
 
