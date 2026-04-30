@@ -78,7 +78,7 @@ export default function App() {
     emailjs.send(
       'service_slel8rg',
       'template_bvyl1qe',
-      { name: 'ALBATUR-Papila', email: 'ipapila@gmail.com', subject: subj, content },
+      { name: 'ALBATUR-Papila', email: 'ipapila@gmail.com', subject: subj, message: content },
       'vFzf9dPBuudScrCmO'
     ).catch(err => console.error('Mail gönderilemedi:', err))
   }
