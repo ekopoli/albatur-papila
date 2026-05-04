@@ -23,16 +23,16 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
 
   const liste = sekme === 'odenmis' ? odenmis : bekleyen
 
-  // Aktif sıralama anahtarına göre diziyi sırala
+  // Sıralama
   const sortedList = [...liste].sort((a, b) => {
     if (sortKey === 'odemeTarihi') {
       const aDate = a.odemeTarihi || ''
       const bDate = b.odemeTarihi || ''
-      return bDate.localeCompare(aDate) // en yeni en üstte (azalan)
+      return bDate.localeCompare(aDate) // en yeni en üstte
     } else {
       const aCode = (a.kodu || a.sinifi || '').toLowerCase()
       const bCode = (b.kodu || b.sinifi || '').toLowerCase()
-      return aCode.localeCompare(bCode, 'tr', { numeric: true }) // A→Z, küçükten büyüğe
+      return aCode.localeCompare(bCode, 'tr', { numeric: true }) // A→Z
     }
   })
 
@@ -55,17 +55,15 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
     position: 'sticky', top: 0, background: 'var(--bg4)', whiteSpace: 'nowrap', zIndex: 10
   })
 
-  // Başlık tıklama yardımcısı
-  const thSortable = (label, key, right = false, color = 'var(--text3)') => ({
+  // Sıralama başlığı için yardımcı stiller (olayları ayrı vereceğiz)
+  const sortableStyle = (right, color) => ({
     ...th(right),
     color,
     cursor: 'pointer',
     userSelect: 'none',
-    onClick: () => setSortKey(key),
-    title: key === 'odemeTarihi' ? 'Tarihe göre sırala (yeni→eski)' : 'Koda göre sırala (A→Z)'
+    fontWeight: sortKey === 'odemeTarihi' ? 700 : 600
   })
 
-  // Sıralama oku
   const sortArrow = (key) => sortKey === key ? ' ▾' : ''
 
   const toggleOdeme = async (job) => {
@@ -111,10 +109,20 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
           <table style={{ borderCollapse: 'collapse', width: '100%' }}>
             <thead>
               <tr>
-                <th style={thSortable('Ödeme Tarihi', 'odemeTarihi', false, '#d97706')}>
+                {/* Ödeme Tarihi – tıklanabilir */}
+                <th
+                  style={sortableStyle(false, '#d97706')}
+                  onClick={() => setSortKey('odemeTarihi')}
+                  title="Tarihe göre sırala (yeni→eski)"
+                >
                   Ödeme Tarihi{sortArrow('odemeTarihi')}
                 </th>
-                <th style={thSortable('Kod', 'kod', false, 'var(--text3)')}>
+                {/* Kod – tıklanabilir */}
+                <th
+                  style={sortableStyle(false, 'var(--text3)')}
+                  onClick={() => setSortKey('kod')}
+                  title="Koda göre sırala (A→Z)"
+                >
                   Kod{sortArrow('kod')}
                 </th>
                 <th style={{ ...th(false), color: 'var(--text3)' }}>Kategori</th>
