@@ -5,23 +5,36 @@ import { InlineNumber } from './components.jsx'
 
 export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
   const [sekme, setSekme] = useState('bekleyen') // bekleyen | odenmis
+  const [sortKey, setSortKey] = useState('odemeTarihi') // 'odemeTarihi' veya 'kod'
 
-  // Tamamlanan tüm işler
   const tumTamamlananlar = jobs.filter(j => j.durum === 'tamamlandi' || j.durum === 'kapandi')
 
-  // Ödenmiş: odenen >= ederi (tam ödeme) VEYA kapandi durumu
-  const odenmis   = tumTamamlananlar.filter(j => {
+  const odenmis = tumTamamlananlar.filter(j => {
     const ederi  = parseFloat(j.birimFiyat || 0) * parseFloat(j.adedi || 0)
     const odenen = parseFloat(j.odenen || 0)
     return ederi > 0 && odenen >= ederi
-  }).sort((a, b) => (b.odemeTarihi || '').localeCompare(a.odemeTarihi || ''))
-  const bekleyen  = tumTamamlananlar.filter(j => {
+  })
+
+  const bekleyen = tumTamamlananlar.filter(j => {
     const ederi  = parseFloat(j.birimFiyat || 0) * parseFloat(j.adedi || 0)
     const odenen = parseFloat(j.odenen || 0)
     return !(ederi > 0 && odenen >= ederi)
   })
 
   const liste = sekme === 'odenmis' ? odenmis : bekleyen
+
+  // Aktif sıralama anahtarına göre diziyi sırala
+  const sortedList = [...liste].sort((a, b) => {
+    if (sortKey === 'odemeTarihi') {
+      const aDate = a.odemeTarihi || ''
+      const bDate = b.odemeTarihi || ''
+      return bDate.localeCompare(aDate) // en yeni en üstte (azalan)
+    } else {
+      const aCode = (a.kodu || a.sinifi || '').toLowerCase()
+      const bCode = (b.kodu || b.sinifi || '').toLowerCase()
+      return aCode.localeCompare(bCode, 'tr', { numeric: true }) // A→Z, küçükten büyüğe
+    }
+  })
 
   const topla = (arr) => ({
     ederi:  arr.reduce((s, j) => s + parseFloat(j.birimFiyat || 0) * parseFloat(j.adedi || 0), 0),
@@ -33,7 +46,7 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
     }, 0)
   })
 
-  const t = topla(liste)
+  const t = topla(sortedList)
 
   const th = (right) => ({
     fontFamily: "'IBM Plex Sans',sans-serif", fontWeight: 600, fontSize: 9,
@@ -42,12 +55,24 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
     position: 'sticky', top: 0, background: 'var(--bg4)', whiteSpace: 'nowrap', zIndex: 10
   })
 
+  // Başlık tıklama yardımcısı
+  const thSortable = (label, key, right = false, color = 'var(--text3)') => ({
+    ...th(right),
+    color,
+    cursor: 'pointer',
+    userSelect: 'none',
+    onClick: () => setSortKey(key),
+    title: key === 'odemeTarihi' ? 'Tarihe göre sırala (yeni→eski)' : 'Koda göre sırala (A→Z)'
+  })
+
+  // Sıralama oku
+  const sortArrow = (key) => sortKey === key ? ' ▾' : ''
+
   const toggleOdeme = async (job) => {
     const ederi  = parseFloat(job.birimFiyat || 0) * parseFloat(job.adedi || 0)
     const odenen = parseFloat(job.odenen || 0)
     const tamOdendi = ederi > 0 && odenen >= ederi
     if (tamOdendi) {
-      // Geri al — ödenen sıfırla
       await updateJob(job.id, { odenen: '', durum: 'tamamlandi' })
     } else if (ederi > 0) {
       const bugun = new Date().toISOString().slice(0, 10)
@@ -86,7 +111,12 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
           <table style={{ borderCollapse: 'collapse', width: '100%' }}>
             <thead>
               <tr>
-                <th style={{ ...th(false), color: 'var(--text3)' }}>Kod</th>
+                <th style={thSortable('Ödeme Tarihi', 'odemeTarihi', false, '#d97706')}>
+                  Ödeme Tarihi{sortArrow('odemeTarihi')}
+                </th>
+                <th style={thSortable('Kod', 'kod', false, 'var(--text3)')}>
+                  Kod{sortArrow('kod')}
+                </th>
                 <th style={{ ...th(false), color: 'var(--text3)' }}>Kategori</th>
                 <th style={{ ...th(false), color: 'var(--text3)' }}>S. Veren</th>
                 <th style={{ ...th(true), color: '#d97706' }}>Birim Fiyat</th>
@@ -94,22 +124,28 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
                 <th style={{ ...th(true), color: '#d97706' }}>Ederi</th>
                 <th style={{ ...th(true), color: '#d97706' }}>Ödenen</th>
                 <th style={{ ...th(true), color: '#d97706' }}>Kalan</th>
-                <th style={{ ...th(false), color: 'var(--text3)' }}>Ödeme Tarihi</th>
                 <th style={{ ...th(true), color: '#4ade80', width: 60 }}>Ödendi</th>
               </tr>
             </thead>
             <tbody>
-              {liste.length === 0
+              {sortedList.length === 0
                 ? <tr><td colSpan={10} style={{ textAlign: 'center', padding: 48, color: 'var(--text5)', fontSize: 11 }}>
                     {sekme === 'bekleyen' ? '— Ödeme bekleyen iş yok —' : '— Henüz ödenmiş iş yok —'}
                   </td></tr>
-                : liste.map(job => {
+                : sortedList.map(job => {
                   const ederi  = parseFloat(job.birimFiyat || 0) * parseFloat(job.adedi || 0)
                   const odenen = parseFloat(job.odenen || 0)
                   const kalan  = ederi - odenen
                   const tamOdendi = ederi > 0 && odenen >= ederi
                   return (
                     <tr key={job.id} style={{ opacity: sekme === 'odenmis' ? 0.7 : 1 }}>
+                      <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6)' }}>
+                        {canEditAcc
+                          ? <input className="inp" type="date" style={{ width: 118 }}
+                              key={`dt-${job.id}-${job.odemeTarihi}`} defaultValue={job.odemeTarihi || ''}
+                              onChange={e => updateJob(job.id, { odemeTarihi: e.target.value })} />
+                          : <span style={{ fontSize: 12, color: 'var(--text3)' }}>{job.odemeTarihi || '—'}</span>}
+                      </td>
                       <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6)', fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap' }}>
                         {job.kodu || job.sinifi || '—'}
                       </td>
@@ -143,13 +179,6 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
                       </td>
                       <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6)', textAlign: 'right', fontSize: 12, fontWeight: 500, color: kalan <= 0 ? '#4ade80' : '#f87171' }}>
                         {(ederi > 0 || odenen > 0) ? fmt(kalan) : '—'}
-                      </td>
-                      <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6)' }}>
-                        {canEditAcc
-                          ? <input className="inp" type="date" style={{ width: 118 }}
-                              key={`dt-${job.id}-${job.odemeTarihi}`} defaultValue={job.odemeTarihi || ''}
-                              onChange={e => updateJob(job.id, { odemeTarihi: e.target.value })} />
-                          : <span style={{ fontSize: 12, color: 'var(--text3)' }}>{job.odemeTarihi || '—'}</span>}
                       </td>
                       <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--bg6)', textAlign: 'center' }}>
                         <input type="checkbox" checked={tamOdendi}
