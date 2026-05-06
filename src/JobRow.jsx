@@ -110,7 +110,7 @@ export default function JobRow({ job, idx, canEdit, isSuperUser, showAcc, canEdi
                   outline: '1px solid rgba(192,132,252,.5)' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(192,132,252,.25)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.6)' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(192,132,252,.2)'; e.currentTarget.style.outline = '1px solid rgba(192,132,252,.5)' }}>
-                ↩ Revizyonda
+                ↩ Onaya Gönder
               </button>
             </>)}
 
