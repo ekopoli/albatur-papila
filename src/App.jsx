@@ -34,7 +34,7 @@ export default function App() {
   const [oncelikJob, setOncelikJob] = useState(null)
   const [arama, setArama] = useState('')
 
-  // Custom data — App seviyesinde dinleniyor, form her zaman hazır bulur
+  // Custom data
   const [customCodes, setCustomCodes] = useState({})
   const [rawCustomCodes, setRawCustomCodes] = useState({})
   const [customKategoriler, setCustomKategoriler] = useState([])
@@ -69,21 +69,55 @@ export default function App() {
   }, [tema])
 
   const triggerMail = (job, type = 'new') => {
-    const subj = type === 'new'
-      ? `ALBATUR-Papila — Yeni Sipariş: ${job.kodu || ''} ${job.kategori || ''}`
-      : `↩ ALBATUR-Papila — Revizyon: ${job.kodu || ''} ${job.kategori || ''}`
-    const content = type === 'new'
-      ? `Yeni sipariş kaydedildi.\n\nTarih: ${job.siparisTarihi || '—'}\nSınıf: ${job.sinifi || '—'}\nKod: ${job.kodu || '—'}\nKategori: ${job.kategori || '—'}\nAçıklama: ${job.aciklama || '—'}\nSiparişi Veren: ${job.siparisiVeren || '—'}\nTeslim: ${job.teslimTarihi || '—'}`
-      : `Revizyon alındı.\n\nKod: ${job.kodu || '—'}\nKategori: ${job.kategori || '—'}\nSiparişi Veren: ${job.siparisiVeren || '—'}\n\nRevizyon Notu:\n${job.revizyonNotu || '(yok)'}`
+    let subject = ''
+    let message = ''
+    let emailTo = 'ipapila@gmail.com' // varsayılan
+
+    switch (type) {
+      case 'new':
+        subject = `ALBATUR-Papila — Yeni Sipariş: ${job.kodu || ''} ${job.kategori || ''}`
+        message = `Yeni sipariş kaydedildi.\n\nTarih: ${job.siparisTarihi || '—'}\nSınıf: ${job.sinifi || '—'}\nKod: ${job.kodu || '—'}\nKategori: ${job.kategori || '—'}\nAçıklama: ${job.aciklama || '—'}\nSiparişi Veren: ${job.siparisiVeren || '—'}\nTeslim: ${job.teslimTarihi || '—'}`
+        break
+      case 'revizyon':
+        subject = `↩ ALBATUR-Papila — Revizyon: ${job.kodu || ''} ${job.kategori || ''}`
+        message = `Revizyon alındı.\n\nKod: ${job.kodu || '—'}\nKategori: ${job.kategori || '—'}\nSiparişi Veren: ${job.siparisiVeren || '—'}\n\nRevizyon Notu:\n${job.revizyonNotu || '(yok)'}`
+        break
+      case 'onayda':
+        emailTo = 'murat.sonmez@albaturas.com'
+        subject = `✅ ALBATUR-Papila — Onaya Gönderildi: ${job.kodu || ''} ${job.kategori || ''}`
+        message = `İş onaya gönderildi.\n\nKod: ${job.kodu || '—'}\nKategori: ${job.kategori || '—'}\nAçıklama: ${job.aciklama || '—'}\nSiparişi Veren: ${job.siparisiVeren || '—'}\nTeslim Tarihi: ${job.teslimTarihi || '—'}\n\nLütfen onay sürecini başlatın.`
+        break
+      case 'tamamlandi':
+        subject = `🏁 ALBATUR-Papila — Tamamlandı: ${job.kodu || ''} ${job.kategori || ''}`
+        message = `İş tamamlandı.\n\nKod: ${job.kodu || '—'}\nKategori: ${job.kategori || '—'}\nAçıklama: ${job.aciklama || '—'}\nSiparişi Veren: ${job.siparisiVeren || '—'}\nTeslim Tarihi: ${job.teslimTarihi || '—'}\n\nTeslimat yapılmıştır.`
+        // İki ayrı adrese gönder
+        emailjs.send(
+          'service_slel8rg',
+          'template_bvyl1qe',
+          { name: 'ALBATUR-Papila', email: 'pazarlama@albaturas.com', subject, message },
+          'vFzf9dPBuudScrCmO'
+        ).catch(err => console.error('Pazarlama mail hatası:', err))
+        emailjs.send(
+          'service_slel8rg',
+          'template_bvyl1qe',
+          { name: 'ALBATUR-Papila', email: 'kbt@albaturas.com', subject, message },
+          'vFzf9dPBuudScrCmO'
+        ).catch(err => console.error('KBT mail hatası:', err))
+        return // genel gönderimi atla
+      default:
+        return
+    }
+
+    // Tek gönderim (new, revizyon, onayda)
     emailjs.send(
       'service_slel8rg',
       'template_bvyl1qe',
-      { name: 'ALBATUR-Papila', email: 'ipapila@gmail.com', subject: subj, message: content },
+      { name: 'ALBATUR-Papila', email: emailTo, subject, message },
       'vFzf9dPBuudScrCmO'
     ).catch(err => console.error('Mail gönderilemedi:', err))
   }
 
-  // Beklemede öncelikleri her zaman 1'den sıkıştır
+  // Beklemede öncelikleri sıkıştır
   const oncelikSikistir = async () => {
     const snap = await get(ref(db, 'jobs'))
     const data = snap.val() || {}
@@ -92,7 +126,6 @@ export default function App() {
       .filter(j => (j.durum || 'beklemede') === 'beklemede' && j.oncelik)
       .sort((a, b) => a.oncelik - b.oncelik)
 
-    // Tüm güncellemeleri tek seferde yaz
     const { update: fbUpdate } = await import('firebase/database')
     const batch = {}
     kalanlar.forEach((j, i) => {
@@ -133,7 +166,16 @@ export default function App() {
 
     await updateJob(id, beklemedeCikiyor ? { ...changes, oncelik: null } : changes)
 
-    // Her durum değişikliğinde sıkıştır — beklemedeki boşlukları kapat
+    // Durum değişikliği sonrası mail bildirimi
+    if (yeniDurum && job) {
+      const guncelJob = { ...job, ...changes }
+      if (yeniDurum === 'onayda') {
+        triggerMail(guncelJob, 'onayda')
+      } else if (yeniDurum === 'tamamlandi') {
+        triggerMail(guncelJob, 'tamamlandi')
+      }
+    }
+
     if (yeniDurum) await oncelikSikistir()
   }
 
