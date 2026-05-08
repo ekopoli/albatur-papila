@@ -140,16 +140,47 @@ export default function App() {
     }
   }
 
+  // Yardımcı: durum değişikliğine göre otomatik tarih ekle
+  const otomatikTarihEkle = (job, changes) => {
+    const today = new Date().toISOString().slice(0, 10)
+    const yeniDurum = changes.durum
+    if (yeniDurum === 'onayda' && (!changes.onayaGidisTarihi && !job.onayaGidisTarihi)) {
+      changes.onayaGidisTarihi = today
+    } else if (yeniDurum === 'onayda') {
+      // Revizyondan onaya geçişte de güncelle (son giriş)
+      changes.onayaGidisTarihi = today
+    }
+    if (yeniDurum === 'revizyonda' && (!changes.revizyonaGidisTarihi && !job.revizyonaGidisTarihi)) {
+      changes.revizyonaGidisTarihi = today
+    }
+    if (yeniDurum === 'tamamlandi' && (!changes.teslimTarihi && !job.teslimTarihi)) {
+      changes.teslimTarihi = today
+    }
+  }
+
   const handleSave = async (jobData) => {
     try {
       const eskiJob = jobs.find(j => j.id === jobData.id)
       const beklemedeCikiyor = eskiJob?.durum === 'beklemede' && jobData.durum && jobData.durum !== 'beklemede'
+      
+      // Otomatik tarih ekle (boşsa)
+      const changes = { ...jobData }
+      if (eskiJob) {
+        otomatikTarihEkle(eskiJob, changes)
+      } else {
+        // yeni kayıt
+        const today = new Date().toISOString().slice(0, 10)
+        if (changes.durum === 'onayda' && !changes.onayaGidisTarihi) changes.onayaGidisTarihi = today
+        if (changes.durum === 'revizyonda' && !changes.revizyonaGidisTarihi) changes.revizyonaGidisTarihi = today
+        if (changes.durum === 'tamamlandi' && !changes.teslimTarihi) changes.teslimTarihi = today
+      }
+      
       if (jobData.id) {
-        await updateJob(jobData.id, beklemedeCikiyor ? { ...jobData, oncelik: null } : jobData)
+        await updateJob(jobData.id, beklemedeCikiyor ? { ...changes, oncelik: null } : changes)
         if (beklemedeCikiyor) await oncelikSikistir()
       } else {
-        await addJob(jobData)
-        triggerMail(jobData, 'new')
+        await addJob(changes)
+        triggerMail(changes, 'new')
       }
       setEditJob(null)
     } catch (err) {
@@ -160,14 +191,18 @@ export default function App() {
 
   const handleUpdate = async (id, changes) => {
     const job = jobs.find(j => j.id === id)
-    const eskiDurum = job?.durum || 'beklemede'
+    if (!job) return
+    const eskiDurum = job.durum || 'beklemede'
     const yeniDurum = changes.durum
     const beklemedeCikiyor = eskiDurum === 'beklemede' && yeniDurum && yeniDurum !== 'beklemede'
+
+    // Otomatik tarih ekle
+    otomatikTarihEkle(job, changes)
 
     await updateJob(id, beklemedeCikiyor ? { ...changes, oncelik: null } : changes)
 
     // Durum değişikliği sonrası mail bildirimi
-    if (yeniDurum && job) {
+    if (yeniDurum) {
       const guncelJob = { ...job, ...changes }
       if (yeniDurum === 'onayda') {
         triggerMail(guncelJob, 'onayda')
@@ -186,14 +221,22 @@ export default function App() {
 
   const handleRevizyon = async (job, not, gorsel, linkler) => {
     const eskiDurum = job.durum || 'beklemede'
-    await updateJob(job.id, {
-      durum: 'revizyonda', revizyonNotu: not,
+    const changes = {
+      durum: 'revizyonda',
+      revizyonNotu: not,
       revizyonGorsel: gorsel || '',
       revizyonLink1: (linkler && linkler[0]) || '',
       revizyonLink2: (linkler && linkler[1]) || '',
       revizyonLink3: (linkler && linkler[2]) || '',
       ...(eskiDurum === 'beklemede' ? { oncelik: null } : {})
-    })
+    }
+    
+    // Revizyon tarihi otomatik ekle
+    if (!job.revizyonaGidisTarihi) {
+      changes.revizyonaGidisTarihi = new Date().toISOString().slice(0, 10)
+    }
+    
+    await updateJob(job.id, changes)
     if (eskiDurum === 'beklemede') await oncelikSikistir()
     triggerMail({ ...job, revizyonNotu: not }, 'revizyon')
     setRevizyonJob(null)
@@ -230,7 +273,6 @@ export default function App() {
       if (aO) return -1
       if (bO) return 1
     }
-    // Tüm sekmeler: koda göre küçükten büyüğe
     const aKey = (a.kodu || '').toLowerCase()
     const bKey = (b.kodu || '').toLowerCase()
     return aKey.localeCompare(bKey, 'tr', { numeric: true })
@@ -247,7 +289,6 @@ export default function App() {
     return jobs.filter(j => (j.durum || 'beklemede') === s).length
   }
 
-  // Totals — sadece onaylanmış (tamamlandi + kapandi) işler hesaba dahil
   const onaylilar = filtered.filter(j => j.durum === 'tamamlandi' || j.durum === 'kapandi')
   const totalEderi = onaylilar.reduce((s, j) => s + parseFloat(j.birimFiyat || 0) * parseFloat(j.adedi || 0), 0)
   const totalOdenen = onaylilar.reduce((s, j) => s + parseFloat(j.odenen || 0), 0)
@@ -266,7 +307,6 @@ export default function App() {
     <div style={{ fontFamily: "'IBM Plex Mono',monospace", background: 'var(--bg)', minHeight: '100vh', color: 'var(--text)' }}>
       <style>{CSS}</style>
 
-      {/* Header */}
       <header style={{ background: 'var(--bg2)', borderBottom: '1px solid var(--border)', padding: '0 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 50, position: 'sticky', top: 0, zIndex: 40 }}>
         <img src={LOGO} alt="ALBATUR" style={{ height: 28, objectFit: 'contain' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -292,7 +332,6 @@ export default function App() {
         {page === 'users' && session.role === 'super'
           ? <div style={{ padding: '18px 20px', overflowY: 'auto', flex: 1 }}><UsersPanel users={users} session={session} /></div>
           : <>
-            {/* Controls — sabit */}
             <div style={{ padding: '14px 20px 10px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: tab === 'aktif' ? 8 : 0 }}>
                 {canEdit && <button className="btn bA" onClick={() => setEditJob('new')}>+ Yeni Sipariş</button>}
@@ -312,7 +351,6 @@ export default function App() {
                     )
                   })}
                 </div>
-                {/* Arama */}
                 <div style={{ position: 'relative', marginLeft: 'auto' }}>
                   <span style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--text3)', fontSize: 12, pointerEvents: 'none' }}>🔍</span>
                   <input
@@ -342,7 +380,6 @@ export default function App() {
               )}
             </div>
 
-            {/* Table — scrollable */}
             <div style={{ flex: 1, overflow: 'auto', padding: '0' }}>
             <div style={{ background: 'var(--bg3)', borderTop: 'none', minHeight: '100%' }}>
               <table>
@@ -377,7 +414,6 @@ export default function App() {
         }
       </div>
 
-      {/* Modals */}
       {showMuhasebe && (
         <MuhasebeModal jobs={jobs} canEditAcc={canEditAcc} onClose={() => setShowMuhasebe(false)} />
       )}
