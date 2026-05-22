@@ -13,6 +13,7 @@ import ImportModal from './ImportModal.jsx'
 import MuhasebeModal from './MuhasebeModal.jsx'
 import OncelikPanel from './OncelikPanel.jsx'
 import { RevizyonModal, UsersPanel } from './Modals.jsx'
+import * as XLSX from 'xlsx'
 
 const isAktif = (d) => d !== 'kapandi'
 
@@ -51,6 +52,47 @@ export default function App() {
     return () => { u1(); u2(); u3(); u4(); u5() }
   }, [])
 
+
+  const excelIndir = () => {
+    const fmtTarih = (t) => {
+      if (!t) return ''
+      const [y, m, d] = t.split('-')
+      if (!y || !m || !d) return t
+      return `${d}-${m}-${y}`
+    }
+    const DURUM_LABEL_TR = {
+      beklemede: 'Beklemede', uretimde: 'Üretimde', onayda: 'Onayda',
+      revizyonda: 'Revizyonda', tamamlandi: 'Tamamlandı', kapandi: 'Kapandı'
+    }
+    const rows = jobs.map(j => ({
+      'Sipariş Tarihi':      fmtTarih(j.siparisTarihi),
+      'Sınıfı':             j.sinifi || '',
+      'Kodu':               j.kodu || '',
+      'Kategori':           j.kategori || '',
+      'Açıklama':           j.aciklama || '',
+      'Siparişi Veren':     j.siparisiVeren || '',
+      'Onaya Gidiş Tarihi': fmtTarih(j.onayaGidisTarihi),
+      'Teslim Tarihi':      fmtTarih(j.teslimTarihi),
+      'Durum':              DURUM_LABEL_TR[j.durum] || j.durum || '',
+      'Birim Fiyat':        j.birimFiyat ? parseFloat(j.birimFiyat) : '',
+      'Adet':               j.adedi ? parseFloat(j.adedi) : '',
+      'Ederi':              (j.birimFiyat && j.adedi) ? parseFloat(j.birimFiyat) * parseFloat(j.adedi) : '',
+      'Ödenen':             j.odenen ? parseFloat(j.odenen) : '',
+      'Ödeme Tarihi':       fmtTarih(j.odemeTarihi),
+      'Revizyon Notu':      j.revizyonNotu || '',
+    }))
+    const ws = XLSX.utils.json_to_sheet(rows)
+    // Kolon genişlikleri
+    ws['!cols'] = [
+      { wch: 14 }, { wch: 12 }, { wch: 16 }, { wch: 16 }, { wch: 32 },
+      { wch: 16 }, { wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 12 },
+      { wch: 8  }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 32 },
+    ]
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Siparişler')
+    const tarih = new Date().toISOString().slice(0, 10)
+    XLSX.writeFile(wb, `albatur-papila-${tarih}.xlsx`)
+  }
 
   const logout = () => { setSession(null); setTema('dark'); setPage('main') }
 
@@ -312,6 +354,7 @@ export default function App() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {canAcc && <button className="btn bO" onClick={() => setShowMuhasebe(true)}>₺ Muhasebe</button>}
           {canEdit && <button className="btn bO" onClick={() => setShowImport(true)}>⬆ Excel İçe Aktar</button>}
+          {session.role === 'super' && <button className="btn bO" onClick={excelIndir} title="Tüm siparişleri Excel olarak indir">⬇ Excel İndir</button>}
           {session.role === 'super' && <button className={`btn bO ${page === 'users' ? 'on' : ''}`} onClick={() => setPage(p => p === 'users' ? 'main' : 'users')}>Kullanıcılar</button>}
           <div style={{ display: 'flex', gap: 2, background: 'var(--bg5)', border: '1px solid var(--border2)', borderRadius: 5, padding: 2 }}>
             {[['dark','◉','Koyu'],['dim','◑','Loş'],['light','○','Açık']].map(([t, icon, label]) => (
