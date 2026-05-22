@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { fmt } from './constants.js'
 import { updateJob } from './firebase.js'
 import { InlineNumber } from './components.jsx'
+import * as XLSX from 'xlsx'
 
 export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
   const [sekme, setSekme] = useState('bekleyen') // bekleyen | odenmis
@@ -37,6 +38,42 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
       return aCode.localeCompare(bCode, 'tr', { numeric: true }) // A→Z
     }
   })
+
+  const excelIndir = () => {
+    const fmtTarih = (t) => {
+      if (!t) return ''
+      const [y, m, d] = t.split('-')
+      if (!y || !m || !d) return t
+      return `${d}-${m}-${y}`
+    }
+    const rows = sortedList.map(j => {
+      const ederi  = parseFloat(j.birimFiyat || 0) * parseFloat(j.adedi || 0)
+      const odenen = parseFloat(j.odenen || 0)
+      return {
+        'Ödeme Tarihi':   fmtTarih(j.odemeTarihi),
+        'Kod':            j.kodu || j.sinifi || '',
+        'Kategori':       j.kategori || '',
+        'Siparişi Veren': j.siparisiVeren || '',
+        'Birim Fiyat':    j.birimFiyat ? parseFloat(j.birimFiyat) : '',
+        'Adet':           j.adedi ? parseFloat(j.adedi) : '',
+        'Ederi':          ederi > 0 ? ederi : '',
+        'Ödenen':         odenen > 0 ? odenen : '',
+        'Kalan':          (ederi > 0 || odenen > 0) ? ederi - odenen : '',
+        'Durum':          sekme === 'odenmis' ? 'Ödendi' : 'Ödeme Bekliyor',
+      }
+    })
+    const ws = XLSX.utils.json_to_sheet(rows)
+    ws['!cols'] = [
+      { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 16 },
+      { wch: 12 }, { wch: 8  }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 18 },
+    ]
+    const wb = XLSX.utils.book_new()
+    const sheetName = sekme === 'odenmis' ? 'Ödemesi Yapılanlar' : 'Ödeme Bekleyenler'
+    XLSX.utils.book_append_sheet(wb, ws, sheetName)
+    const tarih = new Date().toISOString().slice(0, 10)
+    const dosyaAdi = sekme === 'odenmis' ? `muhasebe-odenmis-${tarih}.xlsx` : `muhasebe-bekleyen-${tarih}.xlsx`
+    XLSX.writeFile(wb, dosyaAdi)
+  }
 
   const topla = (arr) => ({
     ederi:  arr.reduce((s, j) => s + parseFloat(j.birimFiyat || 0) * parseFloat(j.adedi || 0), 0),
@@ -102,6 +139,7 @@ export default function MuhasebeModal({ jobs, canEditAcc, onClose }) {
                 <span style={{ marginLeft: 6, fontSize: 9, color: sekme === 'odenmis' ? '#4ade80' : 'var(--text5)' }}>{odenmis.length}</span>
               </button>
             </div>
+            <button className="btn bO" onClick={excelIndir} title="Görüntülenen listeyi Excel olarak indir">⬇ Excel İndir</button>
             <button className="btn bG" style={{ fontSize: 16 }} onClick={onClose}>✕</button>
           </div>
         </div>
