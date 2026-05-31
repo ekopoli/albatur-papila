@@ -94,7 +94,7 @@ export default function App() {
     XLSX.writeFile(wb, `albatur-papila-${tarih}.xlsx`)
   }
 
-  const logout = () => { setSession(null); setTema('dark'); setPage('main') }
+  const logout = () => { setSession(null); setTema('dark'); setPage('main'); localStorage.removeItem('albatur_saved_creds') }
 
   const handleLogin = (user) => { setSession(user); setTema(user.tema || 'dark') }
 
