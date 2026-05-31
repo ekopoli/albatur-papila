@@ -1,20 +1,45 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { LOGO } from './constants.js'
 import { updateUserInDB } from './firebase.js'
+
+const STORAGE_KEY = 'albatur_saved_creds'
 
 export default function Login({ users, onLogin }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [err, setErr] = useState('')
-  const [changing, setChanging] = useState(null) // user objesi
+  const [rememberMe, setRememberMe] = useState(false)
+  const [changing, setChanging] = useState(null)
   const [newPw, setNewPw] = useState('')
   const [newPw2, setNewPw2] = useState('')
   const [pwErr, setPwErr] = useState('')
   const [saving, setSaving] = useState(false)
 
+  // Sayfa açılışında kayıtlı bilgileri yükle ve otomatik giriş yap
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (!saved) return
+      const { username: u, password: p } = JSON.parse(saved)
+      setUsername(u)
+      setPassword(p)
+      setRememberMe(true)
+      // users henüz yüklenmişse otomatik giriş
+      if (users && users.length > 0) {
+        const found = users.find(x => x.username === u && x.password === p)
+        if (found && !found.mustChangePassword) onLogin(found)
+      }
+    } catch {}
+  }, [users])
+
   const attempt = () => {
     const u = users.find(u => u.username === username && u.password === password)
     if (!u) { setErr('Kullanıcı adı veya şifre hatalı.'); return }
+    if (rememberMe) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ username, password }))
+    } else {
+      localStorage.removeItem(STORAGE_KEY)
+    }
     if (u.mustChangePassword) {
       setChanging(u)
     } else {
@@ -28,11 +53,14 @@ export default function Login({ users, onLogin }) {
     setSaving(true)
     const updated = { ...changing, password: newPw, mustChangePassword: false }
     await updateUserInDB(changing.id, updated)
+    // Kayıtlıysa yeni şifreyi güncelle
+    if (rememberMe) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ username: updated.username, password: newPw }))
+    }
     setSaving(false)
     onLogin(updated)
   }
 
-  // Şifre değiştirme ekranı
   if (changing) return (
     <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'IBM Plex Mono',monospace" }}>
       <div style={{ width: 320 }}>
@@ -64,7 +92,6 @@ export default function Login({ users, onLogin }) {
     </div>
   )
 
-  // Normal giriş ekranı
   return (
     <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'IBM Plex Mono',monospace" }}>
       <div style={{ width: 310 }}>
@@ -77,10 +104,20 @@ export default function Login({ users, onLogin }) {
             <label className="flbl">Kullanıcı Adı</label>
             <input className="inp" value={username} onChange={e => { setUsername(e.target.value); setErr('') }} placeholder="kullanıcı adı" autoFocus />
           </div>
-          <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: 12 }}>
             <label className="flbl">Şifre</label>
             <input className="inp" type="password" value={password} onChange={e => { setPassword(e.target.value); setErr('') }} placeholder="••••••••" onKeyDown={e => e.key === 'Enter' && attempt()} />
           </div>
+          {/* Beni hatırla */}
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, cursor: 'pointer', userSelect: 'none' }}>
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={e => setRememberMe(e.target.checked)}
+              style={{ accentColor: '#f59e0b', width: 14, height: 14, cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: 11, color: '#555', fontFamily: "'IBM Plex Sans',sans-serif" }}>Beni hatırla</span>
+          </label>
           {err && <div style={{ fontSize: 11, color: '#ef4444', marginBottom: 14, padding: '8px 10px', background: 'rgba(239,68,68,.07)', borderRadius: 4, border: '1px solid rgba(239,68,68,.2)' }}>{err}</div>}
           <button className="btn bA" style={{ width: '100%', justifyContent: 'center', padding: '9px 0' }} onClick={attempt}>Giriş Yap</button>
         </div>
