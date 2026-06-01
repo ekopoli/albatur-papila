@@ -34,6 +34,7 @@ export default function App() {
   const [showImport, setShowImport] = useState(false)
   const [oncelikJob, setOncelikJob] = useState(null)
   const [arama, setArama] = useState('')
+  const [kapandiSiralama, setKapandiSiralama] = useState('kodu') // 'kodu' | 'kategori'
 
   // Custom data
   const [customCodes, setCustomCodes] = useState({})
@@ -315,6 +316,11 @@ export default function App() {
       if (aO) return -1
       if (bO) return 1
     }
+    if (tab === 'kapandi') {
+      const aKey = (kapandiSiralama === 'kategori' ? (a.kategori || '') : (a.kodu || '')).toLowerCase()
+      const bKey = (kapandiSiralama === 'kategori' ? (b.kategori || '') : (b.kodu || '')).toLowerCase()
+      return aKey.localeCompare(bKey, 'tr', { numeric: true })
+    }
     const aKey = (a.kodu || '').toLowerCase()
     const bKey = (b.kodu || '').toLowerCase()
     return aKey.localeCompare(bKey, 'tr', { numeric: true })
@@ -394,6 +400,17 @@ export default function App() {
                     )
                   })}
                 </div>
+                {tab === 'kapandi' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'var(--bg5)', border: '1px solid var(--border2)', borderRadius: 6, padding: '3px 5px' }}>
+                    <span style={{ fontSize: 9, color: 'var(--text4)', marginRight: 2, fontFamily: "'IBM Plex Sans',sans-serif" }}>Sırala:</span>
+                    {[['kodu', 'Kodu'], ['kategori', 'Kategori']].map(([k, l]) => (
+                      <button key={k} onClick={() => setKapandiSiralama(k)}
+                        style={{ padding: '3px 9px', borderRadius: 4, border: 'none', cursor: 'pointer', fontSize: 10, fontFamily: "'IBM Plex Sans',sans-serif", fontWeight: kapandiSiralama === k ? 600 : 400, background: kapandiSiralama === k ? 'var(--bg6)' : 'transparent', color: kapandiSiralama === k ? '#f59e0b' : 'var(--text3)', boxShadow: kapandiSiralama === k ? '0 1px 3px rgba(0,0,0,.4)' : 'none', transition: 'all .15s' }}>
+                        {l}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div style={{ position: 'relative', marginLeft: 'auto' }}>
                   <span style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--text3)', fontSize: 12, pointerEvents: 'none' }}>🔍</span>
                   <input
